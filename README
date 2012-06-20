@@ -38,13 +38,14 @@ work on any vanilla Ruby install.
 Usage is fairly simple, -? will give you full instructions:
 
 $ ./pipal.rb -?
-pipal 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
 
 Usage: pipal [OPTION] ... FILENAME
         --help, -h: show help
         --top, -t X: show the top X results (default 10)
         --output, -o : output to file
         --external, -e : external file to compare words against
+		--gkey <Google Maps API key>: to allow zip code lookups (optional)
 
         FILENAME: The file to count 
 
@@ -57,6 +58,16 @@ The progress bar is based on a line count from the file which it gets this using
 the wc command. If it can't find wc it will make a guess at the number of lines
 based on the file size and an average line length of 8 bytes so the progress bar
 may not be fully accurate but should still give you an idea.
+
+The Google Maps API key is supposed to be used by Google to only allow access to
+their API to registered users. I assumed this was true and registered for a key
+but in putting together this release I found that it will take any value and
+still do the look up. This may be a bug at the Google end or deliberate and may
+change any any time so I'd suggest grabbing a key just in case. To use it you
+can either edit the script and put the key into the constant on line 35 or you
+can pass it on the command line every time. If you are going to hope that you
+don't need a valid key then just put X in as the value as without something
+Pipal won't try to perform a look up.
 
 Version History
 ===============
