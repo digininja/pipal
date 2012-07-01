@@ -47,6 +47,7 @@ time = Benchmark.measure do
 days_ab = {'mon' => 0, 'tues' => 0, 'wed' => 0, 'thurs' => 0, 'fri' => 0, 'sat' => 0, 'sun' => 0}
 months_ab = {"jan" => 0, "feb" => 0, "mar" => 0, "apr" => 0, "may" => 0, "jun" => 0, "jul" => 0, "aug" => 0, "sept" => 0, "oct" => 0, "nov" => 0, "dec" => 0}
 
+colours = {"black" => 0, "blue" => 0, "brown" => 0, "gray" => 0, "green" => 0, "orange" => 0, "pink" => 0, "purple" => 0, "red" => 0, "white" => 0, "yellow" => 0, 'violet' => 0, 'indigo' => 0}
 days = {'monday' => 0, 'tuesday' => 0, 'wednesday' => 0, 'thursday' => 0, 'friday' => 0, 'saturday' => 0, 'sunday' => 0}
 months = {"january" => 0, "february" => 0, "march" => 0, "april" => 0, "may" => 0, "june" => 0, "july" => 0, "august" => 0, "september" => 0, "october" => 0, "november" => 0, "december" => 0}
 
@@ -423,6 +424,12 @@ catch :ctrl_c do
 					end
 				end
 
+				colours.each_pair do |colour, count|
+					if /#{colour}/i.match line
+						colours[colour] += 1
+					end
+				end
+
 				days.each_pair do |day, count|
 					if /#{day}/i.match line
 						days[day] += 1
@@ -744,6 +751,20 @@ end
 unless disp
 	output_file.puts "None found"
 end
+
+output_file.puts
+output_file.puts "Colours"
+disp = false
+colours.each_pair do |colour, count|
+	unless count == 0
+		disp = true
+		output_file.puts colour + " = " + count.to_s + ' (' + ((count.to_f/total_lines) * 100).round(2).to_s + '%)' unless count == 0
+	end
+end
+unless disp
+	output_file.puts "None found"
+end
+
 
 output_file.puts
 
