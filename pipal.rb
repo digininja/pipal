@@ -363,7 +363,7 @@ catch :ctrl_c do
 				end
 
 				if lengths[line.length].nil?
-					lengths[line.length] = 1
+					lengths[line.length] = 0
 				end
 				lengths[line.length] += 1
 
