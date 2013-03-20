@@ -1,6 +1,12 @@
 #!/usr/bin/env ruby
 #coding: utf-8
 
+#
+# Author:: Robin Wood (robin@digininja.org)
+# Copyright:: Copyright (c) Robin Wood 2013
+# Licence:: Creative Commons Attribution-Share Alike 2.0
+#
+
 # the UK pound sign breaks some editors so just specifying it
 # as a char code rather than the symbol
 gbp = 163.chr
@@ -28,6 +34,11 @@ keyboard_uk = {
 				"r" => { 1 => "4$5%tgfde"},
 				"f" => { 1 => "ertgvcd"},
 				"v" => { 1 => "cfgb"},
+				"5" => { 0 => "%", 1 => "4$rt6^"},
+				"%" => { 0 => "%", 5 => "4$rt6^"},
+				"t" => { 1 => "5%6^ygr"},
+				"g" => { 1 => "vbhfty"},
+				"b" => { 1 => "vghn"},
 			}
 
 keyboard_number_pad = {
@@ -50,8 +61,23 @@ keyboard = keyboard_number_pad
 keyboard = keyboard_uk
 
 def usage
-	puts "passpat.rb <password>"
-	puts
+	puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+
+Usage: passpat.rb <password>
+
+NOTE - FOR TESTING ONLY THE LEFT HALF OF THE UK KEYBOARD HAS BEEN MAPPED
+
+The results are scored from 0 to #{MAX_SCORE.to_s}. A score of 0 means that a the
+password didn't move from a single key, a score of 1 means that each key entered
+was adjacent to the previous. #{MAX_SCORE.to_s} means that no keys were next to each other.
+
+Based on this, the closer to 1 the score is, the more likely the password is
+to be a keyboard pattern.
+
+Note though, this will not pick up a pattern such as \"qpalzm\" as the system isn't
+that smart (yet).
+
+"
 end
 
 if ARGV.length != 1
