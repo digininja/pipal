@@ -32,6 +32,8 @@ to be a keyboard pattern.
 Note though, this will not pick up a pattern such as \"qpalzm\" as the system isn't
 that smart (yet).
 
+This project is sponsored by the BruCON 5x5 scheme.
+
 "
 end
 
@@ -234,4 +236,3 @@ Unable to open the password file
 		exit 1
 	end
 end
-
