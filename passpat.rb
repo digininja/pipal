@@ -210,7 +210,9 @@ catch :ctrl_c do
 			end
 		end
 		puts "Total passwords processed: #{total_lines.to_s}"
-		puts "Overall pattern score #{(total_score.to_f / total_lines).to_s} out of #{MAX_SCORE}"
+		if total_lines > 0
+			puts "Overall pattern score #{(total_score.to_f / total_lines).to_s} out of #{MAX_SCORE}"
+		end
 	rescue Errno::EACCES => e
 		puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
 
