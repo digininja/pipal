@@ -212,7 +212,7 @@ catch :ctrl_c do
 		puts "Total passwords processed: #{total_lines.to_s}"
 		puts "Overall pattern score #{(total_score.to_f / total_lines).to_s} out of #{MAX_SCORE}"
 	rescue Errno::EACCES => e
-		puts"pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+		puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
 
 Unable to open the password file
 
