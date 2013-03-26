@@ -122,6 +122,8 @@ end
 
 total_lines = 0
 total_score = 0
+total_zeros = 0
+total_ones = 0
 
 catch :ctrl_c do
 	begin
@@ -187,16 +189,22 @@ catch :ctrl_c do
 				# stops divide by zero problems
 				if pass.length == 0
 					puts "Pattern score = 0 out of " + MAX_SCORE.to_s
+					total_zeros += 1
 				else
-					puts "Pattern score = #{(score.to_f / (pass.length)).to_s} out of " + MAX_SCORE.to_s
-					total_score += (score.to_f / (pass.length))
+					avg_score = (score.to_f / pass.length)
+					puts "Pattern score = #{avg_score.to_s} out of " + MAX_SCORE.to_s
+					total_score += avg_score
+					if avg_score == 0
+						total_zeros += 1
+					elsif avg_score == 1
+						total_ones += 1
+					end
 				end
 				puts
 
 				total_lines += 1
 			rescue ArgumentError => e
 				puts "Encoding problem processing word: " + line
-				pbar.inc
 			rescue => e
 				puts "Something went wrong, please report it to robin@digininja.org along with these messages:"
 				puts
@@ -215,6 +223,8 @@ catch :ctrl_c do
 		if total_lines > 0
 			puts "Overall pattern score #{(total_score.to_f / total_lines).to_s} out of #{MAX_SCORE}"
 		end
+		puts "Total lenght zeros found: #{total_zeros.to_s}"
+		puts "Total length ones found: #{total_ones.to_s}"
 	rescue Errno::EACCES => e
 		puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
 
