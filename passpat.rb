@@ -174,7 +174,7 @@ catch :ctrl_c do
 								end
 							end
 							if !found
-								puts "\tNext key not found so using default score #{MAX_SCORE}"
+								puts "\tNext key not found so using default score #{MAX_SCORE}" if verbose
 								score += MAX_SCORE
 							end
 						else
@@ -183,7 +183,7 @@ catch :ctrl_c do
 						end
 					end
 					last_char = c
-					puts "Current total score #{score}"
+					puts "Current total score #{score}" if verbose
 				end
 
 				puts "Password: #{original_password}"
