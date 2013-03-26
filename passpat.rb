@@ -161,26 +161,29 @@ catch :ctrl_c do
 					else
 						if keyboard.has_key?(c)
 							found = false
-							puts "checking #{c} and last char is #{last_char}" if verbose
+							puts "Moving from #{last_char} to #{c}" if verbose
 
 							keyboard[c].each do | diff, chars|
-								puts "comparing #{chars} at diff #{diff}" if verbose
+								puts "\tCharacters #{diff} keys away: #{chars}" if verbose
 								if chars.count(last_char) > 0
 									# The character is next to the last one
 									score += diff
-									puts "found" if verbose
+									puts "\tCharacter found at score #{diff}" if verbose
 									found = true
+									break
 								end
 							end
 							if !found
+								puts "\tNext key not found so using default score #{MAX_SCORE}"
 								score += MAX_SCORE
 							end
 						else
-							puts "character not found in mapping: " + c if verbose
+							puts "Character not found in mapping: #{c} so scoring default #{MAX_SCORE}" if verbose
 							score += MAX_SCORE
 						end
 					end
 					last_char = c
+					puts "Current total score #{score}"
 				end
 
 				puts "Password: #{original_password}"
