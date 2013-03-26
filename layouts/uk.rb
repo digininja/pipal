@@ -2,10 +2,15 @@
 # as a char code rather than the symbol
 gbp = 163.chr
 
+# A description of the file, used in verbose mode
 $layout_description = "UK keyboard layout"
 
 $layout = {
-				"!" => { 0 => "1", 1 => "2\"q"},
+				"!" => { # The character !
+					0 => "1", # is on the same key as 1
+					1 => "2\"q" # and is just one key away from 2, " and q
+					# 2 => "3wa" + gbp # If you wanted to add keys two characters away you could with this line
+				},
 				"1" => { 0 => "!", 1 => "2\"q"},
 				"q" => { 1 => "1!2\"wa"},
 				"a" => { 1 => "qwsxz\\"},
@@ -75,4 +80,10 @@ $layout = {
 			}
 
 # This is the furthest distance we are looking for as a jump + 1
+# This could be calculated by the app when it starts up but that 
+# seems like unnecessary work as you already know it when creating
+# this file.
+#
+# You could also chose to penalise keys further away more by giving
+# them a higher score.
 MAX_SCORE = 2
