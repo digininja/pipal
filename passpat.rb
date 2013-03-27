@@ -37,6 +37,25 @@ This project is sponsored by the BruCON 5x5 scheme.
 "
 end
 
+def list_layouts
+	puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)"
+	puts
+	puts "Available layouts:"
+	puts
+
+	# This gives the directory that passpat is running from
+	script_directory = File.dirname(__FILE__)
+						
+	layouts = Dir[script_directory + '/layouts/*'].reject do |fn| File.directory?(fn) end
+	layouts.each do |layout|
+		layout_name = layout.match(/#{script_directory + '/layouts/'}(.*)\.rb$/)
+		if !layout_name.nil?
+			puts layout_name[1]
+		end
+	end
+	puts
+end
+
 opts = GetoptLong.new(
 	[ '--help', '-h', "-?", GetoptLong::NO_ARGUMENT ],
 	[ '--layout', "-l" , GetoptLong::REQUIRED_ARGUMENT ],
@@ -55,16 +74,16 @@ begin
 				usage
 				exit 0
 			when "--list-layouts"
-					puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
-						
-Add directory listing of the layouts directory
-					"
-
-					exit 0
+				list_layouts
+				exit 0
 			when "--layout"
+				# This gives the directory that passpat is running from
+				script_directory = File.dirname(__FILE__)
+				
+				puts script_directory + "/layouts/" + arg + ".rb"
 				# Yes, directory traversal is here but don't care
-				if File.exist?("./layouts/" + arg + ".rb")
-					require "./layouts/" + arg + ".rb"
+				if File.exist?(script_directory + "/layouts/" + arg + ".rb")
+					require_relative "layouts/" + arg + ".rb"
 				else
 					puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
 
@@ -109,15 +128,24 @@ if verbose
 	puts
 end
 
+if ARGV.count < 1
+	puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+
+No password file specified
+
+"
+	exit 1
+end
+
 filename = ARGV.shift
 
-if !File.exist? filename
+if filename.nil? or !File.exist? filename
 	puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
 
 Can't find the password file
 
 "
-	exit 2
+	exit 1
 end
 
 total_lines = 0
