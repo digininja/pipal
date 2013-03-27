@@ -226,7 +226,7 @@ catch :ctrl_c do
 		if total_lines > 0
 			puts "Overall pattern score #{(total_score.to_f / total_lines).to_s} out of #{MAX_SCORE}"
 		end
-		puts "Total lenght zeros found: #{total_zeros.to_s}"
+		puts "Total length zeros found: #{total_zeros.to_s}"
 		puts "Total length ones found: #{total_ones.to_s}"
 	rescue Errno::EACCES => e
 		puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
