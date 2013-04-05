@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-#coding: utf-8
+# encoding: utf-8
 
 #
 # Author:: Robin Wood (robin@digininja.org)
