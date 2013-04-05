@@ -14,7 +14,7 @@
 #	FILENAME: The file to count
 #
 # Author:: Robin Wood (robin@digininja.org)
-# Copyright:: Copyright (c) Robin Wood 2011
+# Copyright:: Copyright (c) Robin Wood 2013
 # Licence:: Creative Commons Attribution-Share Alike 2.0
 # Speedbumped by Stefan Venken (stefan.venken@gmail.com)
 #
@@ -26,7 +26,18 @@ require'uri'
 require'json'
 require_relative './horizbar'
 require_relative './progressbar'
+
+class Checker
+	def process_word (line)
+	end
+
+	def get_results (total_lines_processed)
+	end
+end
+
+# these have to go after the class above
 require_relative './us_area_codes.rb'
+require_relative './colour_checker.rb'
 
 # Place your google API key here
 # For more info on getting a key see here https://developers.google.com/maps/documentation/javascript/tutorial#api_key
@@ -47,7 +58,6 @@ time = Benchmark.measure do
 days_ab = {'mon' => 0, 'tues' => 0, 'wed' => 0, 'thurs' => 0, 'fri' => 0, 'sat' => 0, 'sun' => 0}
 months_ab = {"jan" => 0, "feb" => 0, "mar" => 0, "apr" => 0, "may" => 0, "jun" => 0, "jul" => 0, "aug" => 0, "sept" => 0, "oct" => 0, "nov" => 0, "dec" => 0}
 
-colours = {"black" => 0, "blue" => 0, "brown" => 0, "gray" => 0, "green" => 0, "orange" => 0, "pink" => 0, "purple" => 0, "red" => 0, "white" => 0, "yellow" => 0, 'violet' => 0, 'indigo' => 0}
 days = {'monday' => 0, 'tuesday' => 0, 'wednesday' => 0, 'thursday' => 0, 'friday' => 0, 'saturday' => 0, 'sunday' => 0}
 months = {"january" => 0, "february" => 0, "march" => 0, "april" => 0, "may" => 0, "june" => 0, "july" => 0, "august" => 0, "september" => 0, "october" => 0, "november" => 0, "december" => 0}
 
@@ -112,7 +122,6 @@ years = {}
 end
 
 # this is the count of words with 1, 2 and 3 numbers on the end
-#strict_last_on_end = [0,0,0,0,0]
 singles_on_end_re = /[^0-9]+([0-9]{1})$/
 singles_on_end = 0
 doubles_on_end_re = /[^0-9]+([0-9]{2})$/
@@ -326,6 +335,9 @@ end
 
 pbar = ProgressBar.new("Processing", file_line_count)
 
+colour_checker = Colour_Checker.new
+us_area_code_checker = US_Area_Code_Checker.new
+
 catch :ctrl_c do
 	begin
 		File.open(filename, "r").each_line do |line|
@@ -344,6 +356,9 @@ catch :ctrl_c do
 					words[line] = 0
 				end
 				words[line] += 1
+
+				colour_checker.process_word(line)
+				us_area_code_checker.process_word(line)
 
 				# strip any non-alpha from the start or end, I was going to strip all non-alpha
 				# but then found a list with Unc0rn as a very common base. Stripping all non-alpha
@@ -367,10 +382,6 @@ catch :ctrl_c do
 				end
 				lengths[line.length] += 1
 
-			#	if line.length > max_length
-			#		max_length = line.length
-			#	end
-
 				if line.length < 9
 					one_to_eight_chars += 1
 				end
@@ -382,21 +393,6 @@ catch :ctrl_c do
 				if line.length > 8
 					over_eight_chars += 1
 				end
-
-#				Replaced with character set upperalpha
-#				if line. =~ /^[A-Z]*$/
-#					only_upper_alpha_chars += 1
-#				end
-
-#				Replaced with character set loweralpha
-#				if line. =~ /^[a-z]*$/
-#					only_lower_alpha_chars += 1
-#				end
-
-#				Replaced with character set alldigit
-#				if line. =~ /^[0-9]*$/
-#					only_numeric_chars += 1
-#				end
 
 				if line =~ first_cap_last_symbol_re
 					first_cap_last_symbol += 1
@@ -424,12 +420,6 @@ catch :ctrl_c do
 					end
 				end
 
-				colours.each_pair do |colour, count|
-					if /#{colour}/i.match line
-						colours[colour] += 1
-					end
-				end
-
 				days.each_pair do |day, count|
 					if /#{day}/i.match line
 						days[day] += 1
@@ -448,21 +438,16 @@ catch :ctrl_c do
 					end
 				end
 
-				#if line =~ /[^0-9]+([0-9]{1})$/
-	#			if /[^0-9]+([0-9]{1})$/.match line
 				if singles_on_end_re.match line
 					singles_on_end += 1
 				end
 				
 				# Can't merge these two as the first is strict, 2 digits on the end, the second 
 				# just wants the last two digits regardless
-	#			if /[^0-9]+([0-9]{2})$/.match line
 				if doubles_on_end_re.match line
-		#		if line =~ /[^0-9]+([0-9]{2})$/
 					doubles_on_end += 1
 				end
 
-	#			if /[^0-9]+([0-9]{3})$/.match line
 				if triples_on_end_re.match line
 				#if line =~ /[^0-9]+([0-9]{3})$/ 
 					triples_on_end += 1
@@ -476,18 +461,9 @@ catch :ctrl_c do
 						end
 						last_on_end[no_of_digits - 1][last_numbers] += 1
 					end
-	#				if /[^0-9]+([0-9]{#{no_of_digits}})$/.match line
-	#					strict_last_on_end[no_of_digits - 1] += 1
-	#				end
 
 				end
 				
-#				numbers_on_end.each_pair do |number, count|
-#					if /[^0-9]*#{number}$/.match line
-#						numbers_on_end[number] += 1
-#					end
-#				end
-
 				char_stats.each_pair do |name, data|
 					begin
 						if line =~ data['regex']
@@ -548,7 +524,6 @@ catch :ctrl_c do
 				puts "Backtrace:"
 				puts e.backtrace
 				puts
-				usage
 				exit 1
 			end
 		end
@@ -751,26 +726,10 @@ end
 unless disp
 	output_file.puts "None found"
 end
-
-output_file.puts
-output_file.puts "Colours"
-disp = false
-colours.each_pair do |colour, count|
-	unless count == 0
-		disp = true
-		output_file.puts colour + " = " + count.to_s + ' (' + ((count.to_f/total_lines) * 100).round(2).to_s + '%)' unless count == 0
-	end
-end
-unless disp
-	output_file.puts "None found"
-end
-
-
 output_file.puts
 
-#output_file.puts "Single digit on the end = " + strict_last_on_end[2].count.to_s + ' (' + ((strict_last_on_end[0].count.to_f/total_lines) * 100).round(2).to_s + '%)'
-#output_file.puts "Two digits on the end = " + strict_last_on_end[2].count.to_s + ' (' + ((strict_last_on_end[1].count.to_f/total_lines) * 100).round(2).to_s + '%)'
-#output_file.puts "Three digits on the end = " + strict_last_on_end[2].count.to_s + ' (' + ((strict_last_on_end[2].count.to_f/total_lines) * 100).round(2).to_s + '%)'
+output_file.puts colour_checker.get_results(total_lines)
+output_file.puts
 
 output_file.puts "Single digit on the end = " + singles_on_end.to_s + ' (' + ((singles_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
 output_file.puts "Two digits on the end = " + doubles_on_end.to_s + ' (' + ((doubles_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
@@ -802,7 +761,6 @@ horiz = HorizBar.new(graph_numbers.values)
 horiz.output_file = output_file
 horiz.draw
 
-area_codes = []
 zip_codes = []
 
 digit_number = 0
@@ -822,13 +780,11 @@ last_on_end.each do |a|
 		c[0, cap_at].each do |d|
 			output_file.puts d[0] + " = " + d[1].to_s + ' (' + ((d[1].to_f/total_lines) * 100).round(2).to_s + '%)'
 
-			if digit_number == 3
-				area_codes << d[0]
-			end
 			if digit_number == 5
 				zip_codes << d[0]
 			end
 		end
+		
 		output_file.puts
 	end
 end
@@ -841,21 +797,8 @@ char_stats = count_ordered.sort do |x,y|
 	(x[1]['count'] <=> y[1]['count']) * -1
 end
 
-areas = {}
-area_codes.each do |code|
-	code = code.to_s
-	if US_area_codes.has_key? code
-		area = US_area_codes[code]
-		areas[code] = area
-	end
-end
-if areas.length > 0
-	output_file.puts "US Area Codes"
-	areas.each_pair do |code, area|
-		output_file.puts code + ' = ' + area[1] + " (" + area[0] + ")"
-	end
-	output_file.puts
-end
+output_file.puts us_area_code_checker.get_results(total_lines)
+output_file.puts
 
 if google_maps_api_key != ""
 	areas = {}
@@ -906,6 +849,8 @@ output_file.puts "Hashcat masks (Top " + cap_at.to_s + ")"
 hashcat_masks[0, cap_at].each do |name, data|
 	output_file.puts name + ": " + data['count'].to_s + " (" + ((data['count'].to_f/total_lines) * 100).round(2).to_s + "%)"
 end
+
+output_file.puts
 
 end
 puts time if false
