@@ -39,6 +39,7 @@ end
 require_relative './us_area_codes.rb'
 require_relative './us_zip_codes.rb'
 require_relative './colour_checker.rb'
+require_relative './windows_complexity_checker.rb'
 require_relative './date_checker.rb'
 
 if RUBY_VERSION =~ /1\.8/
@@ -283,6 +284,7 @@ pbar = ProgressBar.new("Processing", file_line_count)
 
 date_checker = Date_Checker.new
 colour_checker = Colour_Checker.new
+windows_complexity_checker = Windows_Complexity_Checker.new
 us_area_code_checker = US_Area_Code_Checker.new
 us_zip_code_checker = US_Zip_Code_Checker.new
 
@@ -305,6 +307,7 @@ catch :ctrl_c do
 				end
 				words[line] += 1
 
+				windows_complexity_checker.process_word(line)
 				colour_checker.process_word(line)
 				us_area_code_checker.process_word(line)
 				us_zip_code_checker.process_word(line)
@@ -564,6 +567,9 @@ if external_list.length > 0
 end
 
 output_file.puts date_checker.get_results(total_lines)
+output_file.puts
+
+output_file.puts windows_complexity_checker.get_results(total_lines)
 output_file.puts
 
 output_file.puts colour_checker.get_results(total_lines)
