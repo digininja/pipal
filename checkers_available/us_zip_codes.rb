@@ -1,3 +1,5 @@
+register_checker("US_Zip_Code_Checker")
+
 class US_Zip_Code_Checker < Checker
 	# Place your google API key here
 	# For more info on getting a key see here

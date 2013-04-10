@@ -1,3 +1,5 @@
+register_checker("Date_Checker")
+
 class Date_Checker < Checker
 	@@days_ab = {'mon' => 0, 'tues' => 0, 'wed' => 0, 'thurs' => 0, 'fri' => 0, 'sat' => 0, 'sun' => 0}
 	@@months_ab = {"jan" => 0, "feb" => 0, "mar" => 0, "apr" => 0, "may" => 0, "jun" => 0, "jul" => 0, "aug" => 0, "sept" => 0, "oct" => 0, "nov" => 0, "dec" => 0}
@@ -49,7 +51,7 @@ class Date_Checker < Checker
 	end
 
 	def get_results(total_lines_processed)
-		ret_str = "Colours\n"
+		ret_str = "Dates\n"
 
 		ret_str << "\nMonths\n"
 		disp = false

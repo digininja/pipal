@@ -1,3 +1,5 @@
+register_checker("Hashcat_Mask_Generator")
+
 class Hashcat_Mask_Generator < Checker
 	@@hashcat_masks = {}
 	@@cap_at = 10

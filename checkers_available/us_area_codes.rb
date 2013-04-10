@@ -1,3 +1,5 @@
+register_checker("US_Area_Code_Checker")
+
 US_area_codes = {}
 
 US_area_codes[201] = ["NJ","N New Jersey: Jersey City, Hackensack"]
