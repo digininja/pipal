@@ -1,6 +1,7 @@
 register_checker("Hashcat_Mask_Generator")
 
 class Hashcat_Mask_Generator < Checker
+	@@total_lines_processed = 0
 	@@hashcat_masks = {}
 	@@cap_at = 10
 
@@ -26,9 +27,10 @@ class Hashcat_Mask_Generator < Checker
 			@@hashcat_masks[mask_line] = {'count' => 0}
 		end
 		@@hashcat_masks[mask_line]['count'] += 1
+		@@total_lines_processed += 1
 	end
 
-	def get_results(total_lines_processed)
+	def get_results()
 		ret_str = "Hashcat masks (Top #{@@cap_at.to_s})\n\n"
 
 		count_ordered = []
@@ -40,7 +42,7 @@ class Hashcat_Mask_Generator < Checker
 		end
 
 		@@hashcat_masks[0, @@cap_at].each do |name, data|
-			ret_str << "#{name}: #{data['count'].to_s} (#{((data['count'].to_f/total_lines_processed) * 100).round(2).to_s}%)\n"
+			ret_str << "#{name}: #{data['count'].to_s} (#{((data['count'].to_f/@@total_lines_processed) * 100).round(2).to_s}%)\n"
 		end
 
 		return ret_str

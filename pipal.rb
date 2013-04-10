@@ -24,8 +24,16 @@ require 'getoptlong'
 require'net/http'
 require'uri'
 require'json'
+require "pathname"
+
 require_relative './horizbar'
 require_relative './progressbar'
+
+if RUBY_VERSION =~ /1\.8/
+	puts "Sorry, Pipal only works correctly on Ruby >= 1.9.x."
+	puts
+	exit
+end
 
 class Checker
 	def process_word (line)
@@ -35,18 +43,22 @@ class Checker
 	end
 end
 
-# these have to go after the class above
-require_relative './us_area_codes.rb'
-require_relative './us_zip_codes.rb'
-require_relative './colour_checker.rb'
-require_relative './windows_complexity_checker.rb'
-require_relative './date_checker.rb'
-require_relative './hashcat_mask_generator.rb'
+@checkers = []
 
-if RUBY_VERSION =~ /1\.8/
-	puts "Sorry, Pipal only works correctly on Ruby 1.9.x."
-	puts
-	exit
+def register_checker (class_name)
+	@checkers << class_name
+end
+
+# these have to go after the class above
+Dir.glob('checkers_enabled/*').select do |f|
+	if !File.directory? f
+		# Ruby doesn't seem to like doing a require
+		# on a symlink so this finds the ultimate target
+		# of the link (i.e. will travel multiple links)
+		# and require that instead
+		require Pathname.new(f).realpath
+		puts "requiring #{f}"
+	end
 end
 
 trap("SIGINT") { throw :ctrl_c }
@@ -282,12 +294,9 @@ end
 pbar = ProgressBar.new("Processing", file_line_count)
 
 modules = []
-modules << Date_Checker.new
-modules << Colour_Checker.new
-modules << Windows_Complexity_Checker.new
-modules << US_Area_Code_Checker.new
-modules << US_Zip_Code_Checker.new
-modules << Hashcat_Mask_Generator.new
+@checkers.each do |class_name|
+	modules << Object::const_get(class_name).new
+end
 
 catch :ctrl_c do
 	begin
@@ -544,7 +553,7 @@ if external_list.length > 0
 end
 
 modules.each do |mod|
-	output_file.puts mod.get_results(total_lines)
+	output_file.puts mod.get_results
 	output_file.puts
 end
 

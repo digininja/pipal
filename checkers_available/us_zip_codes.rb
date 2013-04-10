@@ -10,6 +10,7 @@ class US_Zip_Code_Checker < Checker
 	@@API_KEY=''
 
 	@@zip_codes = []
+	@@total_lines_processed = 0
 
 	def lookup_by_zipcode(zip)
 		geocoder = "http://maps.google.com/maps/geo?q="
@@ -63,9 +64,10 @@ class US_Zip_Code_Checker < Checker
 				end
 			end
 		end
+		@@total_lines_processed += 1
 	end
 
-	def get_results(total_lines_processed)
+	def get_results()
 		if @@API_KEY != ""
 			areas = {}
 			@@zip_codes.each do |zip|
