@@ -316,13 +316,19 @@ catch :ctrl_c do
 				end
 				words[line] += 1
 
-				threads = []
+				# single threaded
 				modules.each do |mod|
-					threads << Thread.new(line) do |my_line|
-						mod.process_word(my_line)
-					end
+					mod.process_word(line)
 				end
-				threads.each do | a_thread | a_thread.join end
+
+		# Multi-threaded. With just 5 modules this makes the script about 25% slower
+		#		threads = []
+		#		modules.each do |mod|
+		#			threads << Thread.new(line) do |my_line|
+		#				mod.process_word(my_line)
+		#			end
+		#		end
+		#		threads.each do | a_thread | a_thread.join end
 
 				# strip any non-alpha from the start or end, I was going to strip all non-alpha
 				# but then found a list with Unc0rn as a very common base. Stripping all non-alpha
