@@ -41,6 +41,7 @@ require_relative './us_zip_codes.rb'
 require_relative './colour_checker.rb'
 require_relative './windows_complexity_checker.rb'
 require_relative './date_checker.rb'
+require_relative './hashcat_mask_generator.rb'
 
 if RUBY_VERSION =~ /1\.8/
 	puts "Sorry, Pipal only works correctly on Ruby 1.9.x."
@@ -88,8 +89,6 @@ char_sets_ordering = {
 "allspecial" => {"regex" => /^[\p{Punct}]+$/, "count" => 0},
 "othermask" => {"regex" => /^.*$/, "count" => 0}
 }
-
-hashcat_masks = {}
 
 words = {}
 total_lines = 0
@@ -282,11 +281,13 @@ end
 
 pbar = ProgressBar.new("Processing", file_line_count)
 
-date_checker = Date_Checker.new
-colour_checker = Colour_Checker.new
-windows_complexity_checker = Windows_Complexity_Checker.new
-us_area_code_checker = US_Area_Code_Checker.new
-us_zip_code_checker = US_Zip_Code_Checker.new
+modules = []
+modules << Date_Checker.new
+modules << Colour_Checker.new
+modules << Windows_Complexity_Checker.new
+modules << US_Area_Code_Checker.new
+modules << US_Zip_Code_Checker.new
+modules << Hashcat_Mask_Generator.new
 
 catch :ctrl_c do
 	begin
@@ -307,11 +308,9 @@ catch :ctrl_c do
 				end
 				words[line] += 1
 
-				windows_complexity_checker.process_word(line)
-				colour_checker.process_word(line)
-				us_area_code_checker.process_word(line)
-				us_zip_code_checker.process_word(line)
-				date_checker.process_word(line)
+				modules.each do |mod|
+					mod.process_word(line)
+				end
 
 				# strip any non-alpha from the start or end, I was going to strip all non-alpha
 				# but then found a list with Unc0rn as a very common base. Stripping all non-alpha
@@ -408,28 +407,6 @@ catch :ctrl_c do
 						puts "Encoding problem found with password: " + line
 					end
 				end
-
-				# This won't work as the special replacement hits all the previous ?'s that have been replaced, 
-				# lower at the end would do the same with all the characters so can't use the order to fix this problem
-				# mask_line = line.gsub(/[a-z]/, "?l").gsub(/[A-Z]/,'?u').gsub(/[0-9]/, '?d').gsub(/[\p{Punct}]/, '?s')
-				mask_line = ""
-				line.each_char do |char|
-					case char
-						when /[a-z]/
-							mask_line << "?l"
-						when /[A-Z]/
-							mask_line << "?u"
-						when /[0-9]/
-							mask_line << "?d"
-						else
-							mask_line << "?s"
-					end
-				end
-				
-				if !hashcat_masks.has_key? mask_line
-					hashcat_masks[mask_line] = {'count' => 0}
-				end
-				hashcat_masks[mask_line]['count'] += 1
 
 				pbar.inc
 
@@ -566,14 +543,10 @@ if external_list.length > 0
 	end
 end
 
-output_file.puts date_checker.get_results(total_lines)
-output_file.puts
-
-output_file.puts windows_complexity_checker.get_results(total_lines)
-output_file.puts
-
-output_file.puts colour_checker.get_results(total_lines)
-output_file.puts
+modules.each do |mod|
+	output_file.puts mod.get_results(total_lines)
+	output_file.puts
+end
 
 output_file.puts "Single digit on the end = " + singles_on_end.to_s + ' (' + ((singles_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
 output_file.puts "Two digits on the end = " + doubles_on_end.to_s + ' (' + ((doubles_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
@@ -635,12 +608,6 @@ char_stats = count_ordered.sort do |x,y|
 	(x[1]['count'] <=> y[1]['count']) * -1
 end
 
-output_file.puts us_area_code_checker.get_results(total_lines)
-output_file.puts
-
-output_file.puts us_zip_code_checker.get_results(total_lines)
-output_file.puts
-
 output_file.puts "Character sets"
 char_stats.each do |name, data|
 	output_file.puts name + ": " + data['count'].to_s + " (" + ((data['count'].to_f/total_lines) * 100).round(2).to_s + "%)"
@@ -657,20 +624,6 @@ end
 output_file.puts
 output_file.puts "Character set ordering"
 char_sets_ordering.each do |name, data|
-	output_file.puts name + ": " + data['count'].to_s + " (" + ((data['count'].to_f/total_lines) * 100).round(2).to_s + "%)"
-end
-
-count_ordered = []
-hashcat_masks.each_pair do |name, data|
-	count_ordered << [name, data] unless data['count'] == 0
-end
-hashcat_masks = count_ordered.sort do |x,y|
-	(x[1]['count'] <=> y[1]['count']) * -1
-end
-
-output_file.puts
-output_file.puts "Hashcat masks (Top " + cap_at.to_s + ")"
-hashcat_masks[0, cap_at].each do |name, data|
 	output_file.puts name + ": " + data['count'].to_s + " (" + ((data['count'].to_f/total_lines) * 100).round(2).to_s + "%)"
 end
 
