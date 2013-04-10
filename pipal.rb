@@ -50,14 +50,13 @@ def register_checker (class_name)
 end
 
 # these have to go after the class above
-Dir.glob('checkers_enabled/*').select do |f|
+Dir.glob('checkers_enabled/*rb').select do |f|
 	if !File.directory? f
 		# Ruby doesn't seem to like doing a require
 		# on a symlink so this finds the ultimate target
 		# of the link (i.e. will travel multiple links)
 		# and require that instead
 		require Pathname.new(f).realpath
-		puts "requiring #{f}"
 	end
 end
 
@@ -317,9 +316,13 @@ catch :ctrl_c do
 				end
 				words[line] += 1
 
+				threads = []
 				modules.each do |mod|
-					mod.process_word(line)
+					threads << Thread.new(line) do |my_line|
+						mod.process_word(my_line)
+					end
 				end
+				threads.each do | a_thread | a_thread.join end
 
 				# strip any non-alpha from the start or end, I was going to strip all non-alpha
 				# but then found a list with Unc0rn as a very common base. Stripping all non-alpha
@@ -459,6 +462,8 @@ Unable to open the password file
 end
 
 pbar.halt
+
+exit
 
 # This is a screen puts to clear after the status bars in case the data is being written to the screen, do not add outfile to it
 puts
