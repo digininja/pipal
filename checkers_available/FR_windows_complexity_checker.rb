@@ -2,8 +2,12 @@
 register_checker("FR_Windows_Complexity_Checker")
 
 class FR_Windows_Complexity_Checker < Checker
-	@@total_lines_processed = 0
 	@@matches = 0
+
+	def initialize
+		super
+		@description = "Check for default Windows complexity (French)"
+	end
 
 	def process_word (line)
 

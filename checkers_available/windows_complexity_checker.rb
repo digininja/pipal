@@ -1,8 +1,12 @@
 register_checker("Windows_Complexity_Checker")
 
 class Windows_Complexity_Checker < Checker
-	@@total_lines_processed = 0
 	@@matches = 0
+
+	def initialize
+		super
+		@description = "Check for default Windows complexity"
+	end
 
 	def process_word (line)
 

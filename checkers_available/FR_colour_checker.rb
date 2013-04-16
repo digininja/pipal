@@ -10,7 +10,8 @@ class FR_Colour_Checker < Checker
 	attr_accessor :description
 
 	def initialize
-		self.description = "List of common French colours"
+		super
+		@description = "List of common French colours"
 	end
 
 	def get_results()

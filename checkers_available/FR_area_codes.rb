@@ -110,8 +110,12 @@ FR_area_codes["97"] = ["Collectivités d’outre-mer"]
 FR_area_codes["98"] = ["Collectivités d’outre-mer"]
 
 class FR_area_Code_Checker < Checker
-    @@total_lines_processed = 0
     @@areas = {}
+
+	def initialize
+		super
+		@description = "List of French area codes"
+	end
 
     def process_word (line)
         if /(^([0-9]{5})|([0-9]{5})$)/.match(line)

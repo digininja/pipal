@@ -10,7 +10,11 @@ class US_Zip_Code_Checker < Checker
 	@@API_KEY=''
 
 	@@zip_codes = []
-	@@total_lines_processed = 0
+
+	def initialize
+		super
+		@description = "List of US zip codes"
+	end
 
 	def lookup_by_zipcode(zip)
 		geocoder = "http://maps.google.com/maps/geo?q="

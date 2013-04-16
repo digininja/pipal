@@ -35,7 +35,20 @@ if RUBY_VERSION =~ /1\.8/
 	exit
 end
 
+class PipalException < Exception
+end
+
 class Checker
+	attr_writer :cap_at
+	attr_reader :description
+
+	@@total_lines_processed = 0
+
+	def initialize
+		@cap_at = 10
+		@description = "No description given"
+	end
+
 	def process_word (line)
 	end
 
@@ -51,12 +64,16 @@ end
 
 # these have to go after the class above
 Dir.glob('checkers_enabled/*rb').select do |f|
+	require_list = []
 	if !File.directory? f
+		require_list << f
+	end
+	require_list.sort.each do |fn|
 		# Ruby doesn't seem to like doing a require
 		# on a symlink so this finds the ultimate target
 		# of the link (i.e. will travel multiple links)
 		# and require that instead
-		require Pathname.new(f).realpath
+		require Pathname.new(fn).realpath
 	end
 end
 
@@ -294,7 +311,10 @@ pbar = ProgressBar.new("Processing", file_line_count)
 
 modules = []
 @checkers.each do |class_name|
-	modules << Object::const_get(class_name).new
+	mod = Object::const_get(class_name).new
+	mod.cap_at = cap_at
+	modules << mod
+	puts mod.description
 end
 
 catch :ctrl_c do
@@ -370,12 +390,6 @@ catch :ctrl_c do
 
 				if line =~ first_cap_last_num_re
 					first_cap_last_num += 1
-				end
-
-				external_list.each_pair do |domain, count|
-					if /#{Regexp.quote(domain)}/i.match line
-						external_list[domain] += 1
-					end
 				end
 
 				if singles_on_end_re.match line
@@ -540,32 +554,6 @@ output_file.puts
 output_file.puts "First capital last symbol = " + first_cap_last_symbol.to_s + ' (' + ((first_cap_last_symbol.to_f/total_lines) * 100).round(2).to_s + '%)'
 output_file.puts "First capital last number = " + first_cap_last_num.to_s + ' (' + ((first_cap_last_num.to_f/total_lines) * 100).round(2).to_s + '%)'
 
-if external_list.length > 0
-	count_ordered = []
-	external_list.each_pair do |domain, count|
-		count_ordered << [domain, count] unless count == 0
-	end
-	external_list = count_ordered.sort do |x,y|
-		(x[1] <=> y[1]) * -1
-	end
-
-	output_file.puts
-	output_file.puts "External list (Top " + cap_at.to_s + ")"
-	disp = false
-	external_list[0, cap_at].each do |data|
-		disp = true
-		output_file.puts data[0] + " = " + data[1].to_s + ' (' + ((data[1].to_f/total_lines) * 100).round(2).to_s + '%)'
-	end
-	unless disp
-		output_file.puts "None found"
-	end
-end
-
-modules.each do |mod|
-	output_file.puts mod.get_results
-	output_file.puts
-end
-
 output_file.puts "Single digit on the end = " + singles_on_end.to_s + ' (' + ((singles_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
 output_file.puts "Two digits on the end = " + doubles_on_end.to_s + ' (' + ((doubles_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
 output_file.puts "Three digits on the end = " + triples_on_end.to_s + ' (' + ((triples_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
@@ -643,6 +631,11 @@ output_file.puts
 output_file.puts "Character set ordering"
 char_sets_ordering.each do |name, data|
 	output_file.puts name + ": " + data['count'].to_s + " (" + ((data['count'].to_f/total_lines) * 100).round(2).to_s + "%)"
+end
+
+modules.each do |mod|
+	output_file.puts mod.get_results
+	output_file.puts
 end
 
 output_file.puts

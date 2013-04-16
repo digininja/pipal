@@ -1,6 +1,9 @@
 class List_Checker < Checker
 	@@list = {}
-	@@total_lines_processed = 0
+
+	def initialize
+		super
+	end
 
 	def process_word (line)
 		@@list.each_pair do |colour, count|

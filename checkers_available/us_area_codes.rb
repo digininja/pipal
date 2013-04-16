@@ -388,8 +388,12 @@ US_area_codes[989] = ["MI","Upper central Michigan: Mt Pleasant, Saginaw"]
 US_area_codes[999] = ["--","Often used by carriers to indicate that the area code information is unavailable for CNID, even though the rest of the number is present"]
 
 class US_Area_Code_Checker < Checker
-	@@total_lines_processed = 0
 	@@areas = {}
+
+	def initialize
+		super
+		@description = "List of US area codes"
+	end
 
 	def process_word (line)
 		if /([0-9]{3})$/.match(line)

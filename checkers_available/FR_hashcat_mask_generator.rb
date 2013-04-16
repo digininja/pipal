@@ -2,9 +2,12 @@
 register_checker("FR_Hashcat_Mask_Generator")
 
 class FR_Hashcat_Mask_Generator < Checker
-	@@total_lines_processed = 0
 	@@hashcat_masks = {}
-	@@cap_at = 10
+
+	def initialize
+		super
+		@description = "Hashcat mask generator (French)"
+	end
 
 	def process_word (line)
 		# This won't work as the special replacement hits all the previous ?'s that have been replaced, 
@@ -32,7 +35,7 @@ class FR_Hashcat_Mask_Generator < Checker
 	end
 
 	def get_results()
-		ret_str = "Masques Hashcat (Top #{@@cap_at.to_s})\n\n"
+		ret_str = "Masques Hashcat (Top #{@cap_at.to_s})\n\n"
 
 		count_ordered = []
 		@@hashcat_masks.each_pair do |name, data|
@@ -42,7 +45,7 @@ class FR_Hashcat_Mask_Generator < Checker
 			(x[1]['count'] <=> y[1]['count']) * -1
 		end
 
-		@@hashcat_masks[0, @@cap_at].each do |name, data|
+		@@hashcat_masks[0, @cap_at].each do |name, data|
 			ret_str << "#{name}: #{data['count'].to_s} (#{((data['count'].to_f/@@total_lines_processed) * 100).round(2).to_s}%)\n"
 		end
 

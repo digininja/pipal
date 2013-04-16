@@ -2,7 +2,6 @@
 register_checker("FR_Date_Checker")
 
 class FR_Date_Checker < Checker
-    @@total_lines_processed = 0
     #http://fr.wikipedia.org/wiki/Semaine (3ieres lettres)
     @@days_ab = {'lun' => 0, 'mar' => 0, 'mer' => 0, 'jeu' => 0, 'ven' => 0, 'sam' => 0, 'dim' => 0}
     #http://fr.wikipedia.org/wiki/Mois#Abr.C3.A9viations
@@ -15,9 +14,10 @@ class FR_Date_Checker < Checker
 
     @@years = {}
 
-    @@cap_at = 10
-
     def initialize
+		super
+		@description = "French day, month and year checker"
+
         1975.upto(2020) do |year|
             @@years[year] = 0
         end
@@ -127,9 +127,9 @@ class FR_Date_Checker < Checker
             (x[1] <=> y[1]) * -1
         end
 
-        ret_str << "\nAnnées (Top #{@@cap_at.to_s})\n"
+        ret_str << "\nAnnées (Top #{@cap_at.to_s})\n"
         disp = false
-        @@years[0, @@cap_at].each do |data|
+        @@years[0, @cap_at].each do |data|
             disp = true
             ret_str << "#{data[0].to_s} = #{data[1].to_s} (#{((data[1].to_f/@@total_lines_processed) * 100).round(2).to_s}%)\n"
         end
