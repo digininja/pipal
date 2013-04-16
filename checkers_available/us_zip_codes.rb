@@ -7,18 +7,17 @@ class US_Zip_Code_Checker < Checker
 	# 
 	# If you want to leave this blank and pass the key on the command line you can use the --gkey option
 	# From experiments it looks like you don't actually need a valid key but better to have one just in case
-	@@API_KEY=''
-
-	@@zip_codes = []
+	API_KEY=''
 
 	def initialize
 		super
 		@description = "List of US zip codes"
+		@zip_codes = []
 	end
 
 	def lookup_by_zipcode(zip)
 		geocoder = "http://maps.google.com/maps/geo?q="
-		apikey = "&key=" + @@API_KEY
+		apikey = "&key=" + API_KEY
 
 		# Since the zipcode goes directly into the URL request it needs to be cleaned up.
 		request = "#{geocoder}#{URI::encode(zip.to_s)}, USA#{apikey}"
@@ -56,25 +55,25 @@ class US_Zip_Code_Checker < Checker
 	end
 
 	def process_word (line)
-		if @@API_KEY != ""
+		if @API_KEY != ""
 			if /([0-9]{5})$/.match(line)
 				area_code = $1.to_i
 				if US_area_codes.has_key?(area_code)
-					if !@@areas.has_key?(area_code)
-						@@areas[area_code] = 1
+					if !@areas.has_key?(area_code)
+						@areas[area_code] = 1
 					else
-						@@areas[area_code] += 1
+						@areas[area_code] += 1
 					end
 				end
 			end
 		end
-		@@total_lines_processed += 1
+		@total_lines_processed += 1
 	end
 
 	def get_results()
-		if @@API_KEY != ""
+		if API_KEY != ""
 			areas = {}
-			@@zip_codes.each do |zip|
+			@zip_codes.each do |zip|
 				area = lookup_by_zipcode zip
 				unless area.nil?
 					areas[zip] = area

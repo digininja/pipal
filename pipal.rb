@@ -26,8 +26,12 @@ require'uri'
 require'json'
 require "pathname"
 
-require_relative './horizbar'
-require_relative './progressbar'
+# Find out what our base path is
+base_path = File.expand_path(File.dirname(__FILE__))
+
+# Load our custom syntax node classes so the parser can use them
+require File.join(base_path, 'horizbar.rb')
+require File.join(base_path, 'progressbar.rb')
 
 if RUBY_VERSION =~ /1\.8/
 	puts "Sorry, Pipal only works correctly on Ruby >= 1.9.x."
@@ -42,10 +46,9 @@ class Checker
 	attr_writer :cap_at
 	attr_reader :description
 
-	@@total_lines_processed = 0
-
 	def initialize
 		@cap_at = 10
+		@total_lines_processed = 0
 		@description = "No description given"
 	end
 
@@ -177,7 +180,10 @@ end
 def list_checkers
 	all_checkers = {}
 
-	Dir.glob('checkers_enabled/*rb').select do |fn|
+	# Find out what our base path is
+	base_path = File.expand_path(File.dirname(__FILE__))
+
+	Dir.glob(base_path + '/checkers_enabled/*rb').select do |fn|
 		if !File.directory? fn
 			# Ruby doesn't seem to like doing a require
 			# on a symlink so this finds the ultimate target
@@ -193,7 +199,7 @@ def list_checkers
 	end
 
 	@checkers = []
-	Dir.glob('checkers_available/*rb').select do |fn|
+	Dir.glob(base_path + '/checkers_available/*rb').select do |fn|
 		if !File.directory? fn
 			# Ruby doesn't seem to like doing a require
 			# on a symlink so this finds the ultimate target
@@ -349,7 +355,7 @@ end
 pbar = ProgressBar.new("Processing", file_line_count)
 
 # these have to go after the class above
-Dir.glob('checkers_enabled/*rb').select do |f|
+Dir.glob(base_path + '/checkers_enabled/*rb').select do |f|
 	require_list = []
 	if !File.directory? f
 		require_list << f

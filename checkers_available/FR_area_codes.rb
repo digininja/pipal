@@ -110,7 +110,7 @@ FR_area_codes["97"] = ["Collectivités d’outre-mer"]
 FR_area_codes["98"] = ["Collectivités d’outre-mer"]
 
 class FR_area_Code_Checker < Checker
-    @@areas = {}
+    @areas = {}
 
 	def initialize
 		super
@@ -128,23 +128,23 @@ class FR_area_Code_Checker < Checker
 		($1[2].to_i == $1[3].to_i) and ($1[3].to_i == $1[4].to_i)))
                 area_code = $1[0,2]
                 if FR_area_codes.has_key?(area_code)
-                    if !@@areas.has_key?(area_code)
-                        @@areas[area_code] = 1
+                    if !@areas.has_key?(area_code)
+                        @areas[area_code] = 1
                     else
-                        @@areas[area_code] += 1
+                        @areas[area_code] += 1
                     end
                 end
             end
         end
-        @@total_lines_processed += 1
+        @total_lines_processed += 1
     end
 
     def get_results()
         ret_str = "Départements français\n"
 
-        if @@areas.length > 0
-            (@@areas.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |area_code_data|
-                ret_str << "#{area_code_data[0].to_s} #{FR_area_codes[area_code_data[0]][1]} (#{FR_area_codes[area_code_data[0]][0]}) = #{area_code_data[1].to_s} (#{((area_code_data[1].to_f/@@total_lines_processed) * 100).round(2).to_s}%)\n"
+        if @areas.length > 0
+            (@areas.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |area_code_data|
+                ret_str << "#{area_code_data[0].to_s} #{FR_area_codes[area_code_data[0]][1]} (#{FR_area_codes[area_code_data[0]][0]}) = #{area_code_data[1].to_s} (#{((area_code_data[1].to_f/@total_lines_processed) * 100).round(2).to_s}%)\n"
             end
         else
             ret_str << "Aucun trouvé\n"

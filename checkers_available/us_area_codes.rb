@@ -388,31 +388,31 @@ US_area_codes[989] = ["MI","Upper central Michigan: Mt Pleasant, Saginaw"]
 US_area_codes[999] = ["--","Often used by carriers to indicate that the area code information is unavailable for CNID, even though the rest of the number is present"]
 
 class US_Area_Code_Checker < Checker
-	@@areas = {}
 
 	def initialize
 		super
 		@description = "List of US area codes"
+		@areas = {}
 	end
 
 	def process_word (line)
 		if /([0-9]{3})$/.match(line)
 			area_code = $1.to_i
 			if US_area_codes.has_key?(area_code)
-				if !@@areas.has_key?(area_code)
-					@@areas[area_code] = 1
+				if !@areas.has_key?(area_code)
+					@areas[area_code] = 1
 				else
-					@@areas[area_code] += 1
+					@areas[area_code] += 1
 				end
 			end
 		end
-		@@total_lines_processed += 1
+		@total_lines_processed += 1
 	end
 
 	def get_results()
 		ret_str = "US Area Codes\n"
 
-		if @@areas.length > 0
+		if @areas.length > 0
 			# The sort changes the hash:
 			# { [200] => 3, [201] => 4}
 			#
@@ -420,8 +420,8 @@ class US_Area_Code_Checker < Checker
 			# [ [201, 4], [200, 3] ]
 			#
 			# the -1 in the sort makes it to sort highest first
-			(@@areas.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |area_code_data|
-				ret_str << "#{area_code_data[0].to_s} #{US_area_codes[area_code_data[0]][1]} (#{US_area_codes[area_code_data[0]][0]}) = #{area_code_data[1].to_s} (#{((area_code_data[1].to_f/@@total_lines_processed) * 100).round(2).to_s}%)\n"
+			(@areas.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |area_code_data|
+				ret_str << "#{area_code_data[0].to_s} #{US_area_codes[area_code_data[0]][1]} (#{US_area_codes[area_code_data[0]][0]}) = #{area_code_data[1].to_s} (#{((area_code_data[1].to_f/@total_lines_processed) * 100).round(2).to_s}%)\n"
 			end
 		else
 			ret_str << "None found\n"
