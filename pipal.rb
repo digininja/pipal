@@ -62,21 +62,6 @@ def register_checker (class_name)
 	@checkers << class_name
 end
 
-# these have to go after the class above
-Dir.glob('checkers_enabled/*rb').select do |f|
-	require_list = []
-	if !File.directory? f
-		require_list << f
-	end
-	require_list.sort.each do |fn|
-		# Ruby doesn't seem to like doing a require
-		# on a symlink so this finds the ultimate target
-		# of the link (i.e. will travel multiple links)
-		# and require that instead
-		require Pathname.new(fn).realpath
-	end
-end
-
 trap("SIGINT") { throw :ctrl_c }
 
 time = Benchmark.measure do
@@ -167,7 +152,8 @@ opts = GetoptLong.new(
 	[ '--output', "-o" , GetoptLong::REQUIRED_ARGUMENT ],
 	[ '--external', "-e" , GetoptLong::REQUIRED_ARGUMENT ],
 	[ '--gkey', GetoptLong::REQUIRED_ARGUMENT ],
-	[ "-v" , GetoptLong::NO_ARGUMENT ]
+	[ "-v" , GetoptLong::NO_ARGUMENT ],
+	[ "--list-checkers" , GetoptLong::NO_ARGUMENT ],
 )
 
 # Display the usage
@@ -180,11 +166,61 @@ Usage: pipal [OPTION] ... FILENAME
 	--output, -o <filename>: output to file
 	--external, -e <filename>: external file to compare words against
 	--gkey <Google Maps API key>: to allow zip code lookups (optional)
+	--list-checkers: Show the available checkers and which are enabled
 
 	FILENAME: The file to count
 
 "
 	exit
+end
+
+def list_checkers
+	all_checkers = {}
+
+	Dir.glob('checkers_enabled/*rb').select do |fn|
+		if !File.directory? fn
+			# Ruby doesn't seem to like doing a require
+			# on a symlink so this finds the ultimate target
+			# of the link (i.e. will travel multiple links)
+			# and require that instead
+			require Pathname.new(fn).realpath
+		end
+	end
+
+	@checkers.each do |class_name|
+		mod = Object::const_get(class_name).new
+		all_checkers[class_name] = {'description' => mod.description, 'enabled' => true}
+	end
+
+	@checkers = []
+	Dir.glob('checkers_available/*rb').select do |fn|
+		if !File.directory? fn
+			# Ruby doesn't seem to like doing a require
+			# on a symlink so this finds the ultimate target
+			# of the link (i.e. will travel multiple links)
+			# and require that instead
+			require Pathname.new(fn).realpath
+		end
+	end
+
+	@checkers.each do |class_name|
+		mod = Object::const_get(class_name).new
+		all_checkers[class_name] = {'description' => mod.description, 'enabled' => false}
+	end
+
+	puts "pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)"
+	puts
+	puts "You have the following Checkers on your system"
+	puts "=============================================="
+
+	all_checkers.sort.each do |check|
+		puts "#{check[0]} - #{check[1]['description']}" + (check[1]['enabled']?" - Enabled":"")
+	end
+	
+	puts
+
+	exit
+
 end
 
 cap_at = 10
@@ -198,6 +234,9 @@ begin
 		case opt
 			when '--help'
 				usage
+			when "--list-checkers"
+				list_checkers
+				exit
 			when "--top"
 				if arg.is_numeric?
 					cap_at = arg.to_i
@@ -309,12 +348,26 @@ end
 
 pbar = ProgressBar.new("Processing", file_line_count)
 
+# these have to go after the class above
+Dir.glob('checkers_enabled/*rb').select do |f|
+	require_list = []
+	if !File.directory? f
+		require_list << f
+	end
+	require_list.sort.each do |fn|
+		# Ruby doesn't seem to like doing a require
+		# on a symlink so this finds the ultimate target
+		# of the link (i.e. will travel multiple links)
+		# and require that instead
+		require Pathname.new(fn).realpath
+	end
+end
+
 modules = []
 @checkers.each do |class_name|
 	mod = Object::const_get(class_name).new
 	mod.cap_at = cap_at
 	modules << mod
-	puts mod.description
 end
 
 catch :ctrl_c do
