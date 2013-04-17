@@ -57,9 +57,9 @@ class FR_Date_Checker < Checker
     end
 
     def get_results()
-        ret_str = "Dates\n"
+        ret_str = "French dates\n"
 
-        ret_str << "\nMois\n"
+        ret_str << "\nMonths\n"
         disp = false
         @months.each_pair do |month, count|
             unless count == 0
@@ -68,10 +68,10 @@ class FR_Date_Checker < Checker
             end
         end
         unless disp
-            ret_str "Aucun trouvé\n"
+            ret_str "None found\n"
         end
 
-        ret_str << "\nJours\n"
+        ret_str << "\nDays\n"
         disp = false
         @days.each_pair do |day, count|
            unless count == 0
@@ -80,10 +80,10 @@ class FR_Date_Checker < Checker
            end
         end
         unless disp
-            ret_str << "Aucun trouvé\n"
+            ret_str << "None found\n"
         end
 
-        ret_str << "\nMois (Abréviation)\n"
+        ret_str << "\nMonths (Abreviated)\n"
         disp = false
         @months_ab.each_pair do |month, count|
             unless count == 0
@@ -92,10 +92,10 @@ class FR_Date_Checker < Checker
             end
         end
         unless disp
-            ret_str << "Aucun trouvé\n"
+            ret_str << "None found\n"
         end
 
-        ret_str << "\nJours (Abréviation)\n"
+        ret_str << "\nDays (Abreviated)\n"
         disp = false
         @days_ab.each_pair do |day, count|
             unless count == 0
@@ -104,10 +104,10 @@ class FR_Date_Checker < Checker
             end
         end
         unless disp
-            ret_str << "Aucun trouvé\n"
+            ret_str << "None found\n"
         end
 
-        ret_str << "\nAnnées inclues\n"
+        ret_str << "\nIncludes years\n"
         disp = false
         @years.each_pair do |number, count|
             unless count == 0
@@ -116,7 +116,7 @@ class FR_Date_Checker < Checker
             end
         end
         unless disp
-            ret_str << "Aucune trouvée\n"
+            ret_str << "None found\n"
         end
 
         count_ordered = []
@@ -127,14 +127,14 @@ class FR_Date_Checker < Checker
             (x[1] <=> y[1]) * -1
         end
 
-        ret_str << "\nAnnées (Top #{@cap_at.to_s})\n"
+        ret_str << "\nYears (Top #{@cap_at.to_s})\n"
         disp = false
         @years[0, @cap_at].each do |data|
             disp = true
             ret_str << "#{data[0].to_s} = #{data[1].to_s} (#{((data[1].to_f/@total_lines_processed) * 100).round(2).to_s}%)\n"
         end
         unless disp
-            ret_str << "Aucune trouvée\n"
+            ret_str << "None found\n"
         end
 
         return ret_str
