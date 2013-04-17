@@ -1,0 +1,15 @@
+noir
+bleu
+maron
+gris
+vert
+orange
+rose
+rouge
+blanc
+jaune
+violet
+indigo
+ocre
+cyan
+ocre
