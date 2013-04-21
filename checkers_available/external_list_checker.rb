@@ -1,12 +1,31 @@
 register_checker("External_List_Checker")
 
 class External_List_Checker < Checker
-	@file_name = '/home/robin/tools/password/pipal/ext'
+	@file_name = nil
 
 	def initialize
 		super
 		@description = "Check an external file for matches"
 
+		@external_list = {}
+		@cli_params = [['--ext.file', GetoptLong::REQUIRED_ARGUMENT]]
+	end
+
+	def parse_params opts
+		opts.each do |opt, arg|
+			case opt
+				when '--ext.file'
+					@file_name = arg
+					load_file
+			end
+		end
+
+		if @file_name.nil?
+			raise Exception.new(true), "External File Checker - No file specified"
+		end
+	end
+
+	def load_file
 		if !@file_name.nil?
 			if File.exist?(@file_name)
 				begin
@@ -20,8 +39,6 @@ class External_List_Checker < Checker
 				raise PipalException.new("Unable to open external file")
 			end
 		end
-
-		@external_list = {}
 	end
 
 	def process_word (line)

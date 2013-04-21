@@ -45,11 +45,16 @@ end
 class Checker
 	attr_writer :cap_at
 	attr_reader :description
+	attr_reader :cli_params
 
 	def initialize
 		@cap_at = 10
 		@total_lines_processed = 0
 		@description = "No description given"
+		@cli_params = nil
+	end
+
+	def parse_params opts
 	end
 
 	def process_word (line)
@@ -235,8 +240,40 @@ external_list = {}
 # Need to find a way to handle this properly
 google_maps_api_key = ""
 
+# these have to go after the class above
+Dir.glob(base_path + '/checkers_enabled/*rb').select do |f|
+	require_list = []
+	if !File.directory? f
+		require_list << f
+	end
+	require_list.sort.each do |fn|
+		# Ruby doesn't seem to like doing a require
+		# on a symlink so this finds the ultimate target
+		# of the link (i.e. will travel multiple links)
+		# and require that instead
+		require Pathname.new(fn).realpath
+	end
+end
+
+modules = []
+
+@checkers.each do |class_name|
+	mod = Object::const_get(class_name).new
+	mod.cap_at = cap_at
+	modules << mod
+	
+	if !mod.cli_params.nil?
+		mod.cli_params.each do |param|
+			opts.set_options(param)
+		end
+	end
+end
+
 begin
+	stored_opts = {}
+
 	opts.each do |opt, arg|
+		stored_opts[opt] = arg
 		case opt
 			when '--help'
 				usage
@@ -299,6 +336,12 @@ Unable to open output file
 				end
 		end
 	end
+	puts stored_opts
+
+	# allow each of the modules to pull out the CLI params they require
+	modules.each do |mod|
+		mod.parse_params stored_opts
+	end
 rescue GetoptLong::InvalidOption => e
 	puts
 	usage
@@ -353,28 +396,6 @@ else
 end
 
 pbar = ProgressBar.new("Processing", file_line_count)
-
-# these have to go after the class above
-Dir.glob(base_path + '/checkers_enabled/*rb').select do |f|
-	require_list = []
-	if !File.directory? f
-		require_list << f
-	end
-	require_list.sort.each do |fn|
-		# Ruby doesn't seem to like doing a require
-		# on a symlink so this finds the ultimate target
-		# of the link (i.e. will travel multiple links)
-		# and require that instead
-		require Pathname.new(fn).realpath
-	end
-end
-
-modules = []
-@checkers.each do |class_name|
-	mod = Object::const_get(class_name).new
-	mod.cap_at = cap_at
-	modules << mod
-end
 
 catch :ctrl_c do
 	begin
