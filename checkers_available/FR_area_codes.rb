@@ -114,7 +114,7 @@ class FR_area_Code_Checker < Checker
 
 	def initialize
 		super
-		@description = "List of French area codes"
+		@description = "List of French departments"
 	end
 
     def process_word (line)
@@ -140,14 +140,14 @@ class FR_area_Code_Checker < Checker
     end
 
     def get_results()
-        ret_str = "Départements français\n"
+        ret_str = "French departments\n"
 
         if @areas.length > 0
             (@areas.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |area_code_data|
                 ret_str << "#{area_code_data[0].to_s} #{FR_area_codes[area_code_data[0]][1]} (#{FR_area_codes[area_code_data[0]][0]}) = #{area_code_data[1].to_s} (#{((area_code_data[1].to_f/@total_lines_processed) * 100).round(2).to_s}%)\n"
             end
         else
-            ret_str << "Aucun trouvé\n"
+            ret_str << "None found\n"
         end
 
         return ret_str

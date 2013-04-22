@@ -2,7 +2,7 @@
 require_relative "../list_checker.rb"
 register_checker("FR_Colour_Checker")
 
-class FR_Colour_Checker < Checker
+class FR_Colour_Checker < List_Checker
 	def initialize
 		super
 
