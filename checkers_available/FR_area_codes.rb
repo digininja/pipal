@@ -106,8 +106,18 @@ FR_area_codes["97"] = ["Collectivités d’outre-mer"]
 #FR_area_codes["972"] = ["Martinique"]
 #FR_area_codes["973"] = ["Guyane"]
 #FR_area_codes["974"] = ["La Réunion"]
+#FR_area_codes["975"] = ["Saint-Pierre-et-Miquelon"]
 #FR_area_codes["976"] = ["Mayotte"]
+#FR_area_codes["977"] = ["Saint-Barthélemy"]
+#FR_area_codes["978"] = ["Saint-Martin"]
 FR_area_codes["98"] = ["Collectivités d’outre-mer"]
+#FR_area_codes["989"] = ["Île de Clipperton"]
+#FR_area_codes["984"] = ["Terres australes et antarctiques françaises"]
+#FR_area_codes["986"] = ["Wallis-et-Futuna"]
+#FR_area_codes["987"] = ["Polynésie française"]
+#FR_area_codes["988"] = ["Nouvelle-Calédonie"]
+#FR_area_codes["989"] = ["Île de Clipperton"]
+
 
 class FR_area_Code_Checker < Checker
     @areas = {}
