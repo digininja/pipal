@@ -14,7 +14,7 @@
 #	FILENAME: The file to count
 #
 # Author:: Robin Wood (robin@digininja.org)
-# Copyright:: Copyright (c) Robin Wood 2011
+# Copyright:: Copyright (c) Robin Wood 2013
 # Licence:: Creative Commons Attribution-Share Alike 2.0
 # Speedbumped by Stefan Venken (stefan.venken@gmail.com)
 #
@@ -24,32 +24,55 @@ require 'getoptlong'
 require'net/http'
 require'uri'
 require'json'
-require_relative './horizbar'
-require_relative './progressbar'
-require_relative './us_area_codes.rb'
+require "pathname"
 
-# Place your google API key here
-# For more info on getting a key see here https://developers.google.com/maps/documentation/javascript/tutorial#api_key
-# If you want to leave this blank and pass the key on the command line you can use the --gkey option
-# From experiments it looks like you don't actually need a valid key but better to have one just in case
-GOOGLE_API_KEY=''
+# Find out what our base path is
+base_path = File.expand_path(File.dirname(__FILE__))
+
+# Load our custom syntax node classes so the parser can use them
+require File.join(base_path, 'horizbar.rb')
+require File.join(base_path, 'progressbar.rb')
 
 if RUBY_VERSION =~ /1\.8/
-	puts "Sorry, Pipal only works correctly on Ruby 1.9.x."
+	puts "Sorry, Pipal only works correctly on Ruby >= 1.9.x."
 	puts
 	exit
+end
+
+class PipalException < Exception
+end
+
+class Checker
+	attr_writer :cap_at
+	attr_reader :description
+	attr_reader :cli_params
+
+	def initialize
+		@cap_at = 10
+		@total_lines_processed = 0
+		@description = "No description given"
+		@cli_params = nil
+	end
+
+	def parse_params opts
+	end
+
+	def process_word (line)
+	end
+
+	def get_results (total_lines_processed)
+	end
+end
+
+@checkers = []
+
+def register_checker (class_name)
+	@checkers << class_name
 end
 
 trap("SIGINT") { throw :ctrl_c }
 
 time = Benchmark.measure do
-
-days_ab = {'mon' => 0, 'tues' => 0, 'wed' => 0, 'thurs' => 0, 'fri' => 0, 'sat' => 0, 'sun' => 0}
-months_ab = {"jan" => 0, "feb" => 0, "mar" => 0, "apr" => 0, "may" => 0, "jun" => 0, "jul" => 0, "aug" => 0, "sept" => 0, "oct" => 0, "nov" => 0, "dec" => 0}
-
-colours = {"black" => 0, "blue" => 0, "brown" => 0, "gray" => 0, "green" => 0, "orange" => 0, "pink" => 0, "purple" => 0, "red" => 0, "white" => 0, "yellow" => 0, 'violet' => 0, 'indigo' => 0}
-days = {'monday' => 0, 'tuesday' => 0, 'wednesday' => 0, 'thursday' => 0, 'friday' => 0, 'saturday' => 0, 'sunday' => 0}
-months = {"january" => 0, "february" => 0, "march" => 0, "april" => 0, "may" => 0, "june" => 0, "july" => 0, "august" => 0, "september" => 0, "october" => 0, "november" => 0, "december" => 0}
 
 char_stats = {
 "loweralpha" => {'regex' => /^[a-z]+$/, "count" => 0},
@@ -88,8 +111,6 @@ char_sets_ordering = {
 "othermask" => {"regex" => /^.*$/, "count" => 0}
 }
 
-hashcat_masks = {}
-
 words = {}
 total_lines = 0
 
@@ -105,14 +126,7 @@ first_cap_last_num_re = /^[A-Z].*[0-9]$/
 first_cap_last_symbol = 0
 first_cap_last_symbol_re = /^[A-Z].*[\p{Punct}]$/
 
-years = {}
-
-1975.upto(2020) do |year|
-	years[year] = 0
-end
-
 # this is the count of words with 1, 2 and 3 numbers on the end
-#strict_last_on_end = [0,0,0,0,0]
 singles_on_end_re = /[^0-9]+([0-9]{1})$/
 singles_on_end = 0
 doubles_on_end_re = /[^0-9]+([0-9]{2})$/
@@ -130,45 +144,6 @@ end
 last_two_on_end = {}
 last_three_on_end = {}
 
-def lookup_by_zipcode(zip, key)
-	geocoder = "http://maps.google.com/maps/geo?q="
-	apikey = "&key=" + key
-
-    # Since the zipcode goes directly into the URL request it needs to be cleaned up.
-	request = geocoder + URI::encode(zip + ', USA') + apikey
-	resp = Net::HTTP.get_response(URI.parse(request))
-
-	data = JSON.parse(resp.body)
-
-	if data.has_key?('Status')
-		# puts "status: " + data['Status']['code'].to_s
-
-		if (data.has_key?('Placemark') and data['Placemark'].length > 0)
-			#puts data['Placemark'][0].inspect
-			# puts "location: " + data['Placemark'][0]['address']
-
-			if data['Placemark'][0].has_key? 'AddressDetails' and
-				data['Placemark'][0]['AddressDetails'].has_key? 'Country' and
-				data['Placemark'][0]['AddressDetails']['Country'].has_key? 'AdministrativeArea' and
-				data['Placemark'][0]['AddressDetails']['Country']['AdministrativeArea'].has_key? 'Locality' and
-				data['Placemark'][0]['AddressDetails']['Country']['AdministrativeArea']['Locality'].has_key? 'PostalCode' and
-				data['Placemark'][0]['AddressDetails']['Country']['AdministrativeArea']['Locality']['PostalCode'].has_key? 'PostalCodeNumber' and
-				data['Placemark'][0]['AddressDetails']['Country'].has_key? 'CountryName'
-
-			#		puts "Location: " + data['Placemark'][0]['AddressDetails']['Country']['CountryName']
-			#		puts "Location: " + data['Placemark'][0]['AddressDetails']['Country']['AdministrativeArea']['Locality']['PostalCode']['PostalCodeNumber']
-				if data['Placemark'][0]['AddressDetails']['Country']['CountryName'] == 'USA' and data['Placemark'][0]['AddressDetails']['Country']['AdministrativeArea']['Locality']['PostalCode']['PostalCodeNumber'] == zip
-					return data['Placemark'][0]['address']
-				end
-			end
-
-	#		return data['Placemark'][0]['address']
-		end
-	end
-
-	return nil
-end
-
 class String
 	def is_numeric?
 		Integer self rescue false
@@ -185,7 +160,8 @@ opts = GetoptLong.new(
 	[ '--output', "-o" , GetoptLong::REQUIRED_ARGUMENT ],
 	[ '--external', "-e" , GetoptLong::REQUIRED_ARGUMENT ],
 	[ '--gkey', GetoptLong::REQUIRED_ARGUMENT ],
-	[ "-v" , GetoptLong::NO_ARGUMENT ]
+	[ "-v" , GetoptLong::NO_ARGUMENT ],
+	[ "--list-checkers" , GetoptLong::NO_ARGUMENT ],
 )
 
 # Display the usage
@@ -198,6 +174,7 @@ Usage: pipal [OPTION] ... FILENAME
 	--output, -o <filename>: output to file
 	--external, -e <filename>: external file to compare words against
 	--gkey <Google Maps API key>: to allow zip code lookups (optional)
+	--list-checkers: Show the available checkers and which are enabled
 
 	FILENAME: The file to count
 
@@ -205,16 +182,104 @@ Usage: pipal [OPTION] ... FILENAME
 	exit
 end
 
+def list_checkers
+	all_checkers = {}
+
+	# Find out what our base path is
+	base_path = File.expand_path(File.dirname(__FILE__))
+
+	Dir.glob(base_path + '/checkers_enabled/*rb').select do |fn|
+		if !File.directory? fn
+			# Ruby doesn't seem to like doing a require
+			# on a symlink so this finds the ultimate target
+			# of the link (i.e. will travel multiple links)
+			# and require that instead
+			require Pathname.new(fn).realpath
+		end
+	end
+
+	@checkers.each do |class_name|
+		mod = Object::const_get(class_name).new
+		all_checkers[class_name] = {'description' => mod.description, 'enabled' => true}
+	end
+
+	@checkers = []
+	Dir.glob(base_path + '/checkers_available/*rb').select do |fn|
+		if !File.directory? fn
+			# Ruby doesn't seem to like doing a require
+			# on a symlink so this finds the ultimate target
+			# of the link (i.e. will travel multiple links)
+			# and require that instead
+			require Pathname.new(fn).realpath
+		end
+	end
+
+	@checkers.each do |class_name|
+		mod = Object::const_get(class_name).new
+		all_checkers[class_name] = {'description' => mod.description, 'enabled' => false}
+	end
+
+	puts "pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)"
+	puts
+	puts "You have the following Checkers on your system"
+	puts "=============================================="
+
+	all_checkers.sort.each do |check|
+		puts "#{check[0]} - #{check[1]['description']}" + (check[1]['enabled']?" - Enabled":"")
+	end
+	
+	puts
+
+	exit
+
+end
+
 cap_at = 10
 output_file = STDOUT
 external_list = {}
-google_maps_api_key = GOOGLE_API_KEY
+# Need to find a way to handle this properly
+google_maps_api_key = ""
+
+# these have to go after the class above
+Dir.glob(base_path + '/checkers_enabled/*rb').select do |f|
+	require_list = []
+	if !File.directory? f
+		require_list << f
+	end
+	require_list.sort.each do |fn|
+		# Ruby doesn't seem to like doing a require
+		# on a symlink so this finds the ultimate target
+		# of the link (i.e. will travel multiple links)
+		# and require that instead
+		require Pathname.new(fn).realpath
+	end
+end
+
+modules = []
+
+@checkers.each do |class_name|
+	mod = Object::const_get(class_name).new
+	mod.cap_at = cap_at
+	modules << mod
+	
+	if !mod.cli_params.nil?
+		mod.cli_params.each do |param|
+			opts.set_options(param)
+		end
+	end
+end
 
 begin
+	stored_opts = {}
+
 	opts.each do |opt, arg|
+		stored_opts[opt] = arg
 		case opt
 			when '--help'
 				usage
+			when "--list-checkers"
+				list_checkers
+				exit
 			when "--top"
 				if arg.is_numeric?
 					cap_at = arg.to_i
@@ -270,6 +335,12 @@ Unable to open output file
 					exit 1
 				end
 		end
+	end
+	puts stored_opts
+
+	# allow each of the modules to pull out the CLI params they require
+	modules.each do |mod|
+		mod.parse_params stored_opts
 	end
 rescue GetoptLong::InvalidOption => e
 	puts
@@ -345,6 +416,20 @@ catch :ctrl_c do
 				end
 				words[line] += 1
 
+				# single threaded
+				modules.each do |mod|
+					mod.process_word(line)
+				end
+
+		# Multi-threaded. With just 5 modules this makes the script about 25% slower
+		#		threads = []
+		#		modules.each do |mod|
+		#			threads << Thread.new(line) do |my_line|
+		#				mod.process_word(my_line)
+		#			end
+		#		end
+		#		threads.each do | a_thread | a_thread.join end
+
 				# strip any non-alpha from the start or end, I was going to strip all non-alpha
 				# but then found a list with Unc0rn as a very common base. Stripping all non-alpha
 				# would leave with Uncrn which doesn't really make any sense as without the 133t speak
@@ -367,10 +452,6 @@ catch :ctrl_c do
 				end
 				lengths[line.length] += 1
 
-			#	if line.length > max_length
-			#		max_length = line.length
-			#	end
-
 				if line.length < 9
 					one_to_eight_chars += 1
 				end
@@ -383,21 +464,6 @@ catch :ctrl_c do
 					over_eight_chars += 1
 				end
 
-#				Replaced with character set upperalpha
-#				if line. =~ /^[A-Z]*$/
-#					only_upper_alpha_chars += 1
-#				end
-
-#				Replaced with character set loweralpha
-#				if line. =~ /^[a-z]*$/
-#					only_lower_alpha_chars += 1
-#				end
-
-#				Replaced with character set alldigit
-#				if line. =~ /^[0-9]*$/
-#					only_numeric_chars += 1
-#				end
-
 				if line =~ first_cap_last_symbol_re
 					first_cap_last_symbol += 1
 				end
@@ -406,63 +472,16 @@ catch :ctrl_c do
 					first_cap_last_num += 1
 				end
 
-				years.each_pair do |year, count|
-					if /#{year}/.match line
-						years[year] += 1
-					end
-				end
-
-				days_ab.each_pair do |day, count|
-					if /#{day}/i.match line
-						days_ab[day] += 1
-					end
-				end
-
-				months_ab.each_pair do |month, count|
-					if /#{month}/i.match line
-						months_ab[month] += 1
-					end
-				end
-
-				colours.each_pair do |colour, count|
-					if /#{colour}/i.match line
-						colours[colour] += 1
-					end
-				end
-
-				days.each_pair do |day, count|
-					if /#{day}/i.match line
-						days[day] += 1
-					end
-				end
-
-				months.each_pair do |month, count|
-					if /#{month}/i.match line
-						months[month] += 1
-					end
-				end
-
-				external_list.each_pair do |domain, count|
-					if /#{Regexp.quote(domain)}/i.match line
-						external_list[domain] += 1
-					end
-				end
-
-				#if line =~ /[^0-9]+([0-9]{1})$/
-	#			if /[^0-9]+([0-9]{1})$/.match line
 				if singles_on_end_re.match line
 					singles_on_end += 1
 				end
 				
 				# Can't merge these two as the first is strict, 2 digits on the end, the second 
 				# just wants the last two digits regardless
-	#			if /[^0-9]+([0-9]{2})$/.match line
 				if doubles_on_end_re.match line
-		#		if line =~ /[^0-9]+([0-9]{2})$/
 					doubles_on_end += 1
 				end
 
-	#			if /[^0-9]+([0-9]{3})$/.match line
 				if triples_on_end_re.match line
 				#if line =~ /[^0-9]+([0-9]{3})$/ 
 					triples_on_end += 1
@@ -476,18 +495,9 @@ catch :ctrl_c do
 						end
 						last_on_end[no_of_digits - 1][last_numbers] += 1
 					end
-	#				if /[^0-9]+([0-9]{#{no_of_digits}})$/.match line
-	#					strict_last_on_end[no_of_digits - 1] += 1
-	#				end
 
 				end
 				
-#				numbers_on_end.each_pair do |number, count|
-#					if /[^0-9]*#{number}$/.match line
-#						numbers_on_end[number] += 1
-#					end
-#				end
-
 				char_stats.each_pair do |name, data|
 					begin
 						if line =~ data['regex']
@@ -510,28 +520,6 @@ catch :ctrl_c do
 					end
 				end
 
-				# This won't work as the special replacement hits all the previous ?'s that have been replaced, 
-				# lower at the end would do the same with all the characters so can't use the order to fix this problem
-				# mask_line = line.gsub(/[a-z]/, "?l").gsub(/[A-Z]/,'?u').gsub(/[0-9]/, '?d').gsub(/[\p{Punct}]/, '?s')
-				mask_line = ""
-				line.each_char do |char|
-					case char
-						when /[a-z]/
-							mask_line << "?l"
-						when /[A-Z]/
-							mask_line << "?u"
-						when /[0-9]/
-							mask_line << "?d"
-						else
-							mask_line << "?s"
-					end
-				end
-				
-				if !hashcat_masks.has_key? mask_line
-					hashcat_masks[mask_line] = {'count' => 0}
-				end
-				hashcat_masks[mask_line]['count'] += 1
-
 				pbar.inc
 
 				total_lines += 1
@@ -548,7 +536,6 @@ catch :ctrl_c do
 				puts "Backtrace:"
 				puts e.backtrace
 				puts
-				usage
 				exit 1
 			end
 		end
@@ -580,24 +567,24 @@ pbar.halt
 puts
 puts
 
-output_file.puts "Total entries = " + total_lines.to_s
+output_file.puts "Total entries = #{total_lines.to_s}"
 uniq_words = words.to_a.uniq
-output_file.puts "Total unique entries = " + uniq_words.length.to_s
+output_file.puts "Total unique entries = #{uniq_words.length.to_s}"
 uniq_words = Array.new(words.to_a.uniq)
 
 output_file.puts
-output_file.puts "Top " + cap_at.to_s + " passwords"
+output_file.puts "Top #{cap_at.to_s} passwords"
 # The default is to sort lowest to highest, the -1 just inverts that
 words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, cap_at].each { |elem|
 	percentage = (elem[1].to_f / total_lines) * 100
-	output_file.puts elem[0] + " = " + elem[1].to_s + " (" + percentage.round(2).to_s + "%)"
+	output_file.puts "#{elem[0]} = #{elem[1].to_s} (#{percentage.round(2).to_s}%)"
 }
 
 output_file.puts
-output_file.puts "Top " + cap_at.to_s + " base words"
+output_file.puts "Top #{cap_at.to_s} base words"
 base_words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, cap_at].each { |elem|
 	percentage = (elem[1].to_f / total_lines) * 100
-	output_file.puts elem[0] + " = " + elem[1].to_s + " (" + percentage.round(2).to_s + "%)"
+	output_file.puts "#{elem[0]} = #{elem[1].to_s} (#{percentage.round(2).to_s}%)"
 }
 
 output_file.puts
@@ -609,7 +596,7 @@ length_ordered = []
 		lengths[len] = 0
 	end
 	percentage = ((lengths[len].to_f / total_lines) * 100)
-	output_file.puts len.to_s + ' = ' + lengths[len].to_s + " (" + percentage.round(2).to_s + "%)" if lengths[len] > 0
+	output_file.puts "#{len.to_s} = #{lengths[len].to_s} (#{percentage.round(2).to_s}%)" if lengths[len] > 0
 	
 	pair = [len, lengths[len], percentage]
 	length_ordered << pair
@@ -622,7 +609,7 @@ end
 output_file.puts
 output_file.puts "Password length (count ordered)"
 length_ordered.each do |pair|
-	output_file.puts pair[0].to_s + " = " + pair[1].to_s + " (" + pair[2].round(2).to_s + "%)" if pair[1] > 0
+	output_file.puts "#{pair[0].to_s} = #{pair[1].to_s} (#{pair[2].round(2).to_s}%)" if pair[1] > 0
 end
 
 output_file.puts
@@ -631,9 +618,9 @@ horiz = HorizBar.new(lengths)
 horiz.output_file = output_file
 horiz.draw
 
-output_file.puts "One to six characters = " + one_to_six_chars.to_s + ' (' + ((one_to_six_chars.to_f/total_lines) * 100).round(2).to_s + '%)'
-output_file.puts "One to eight characters = " + one_to_eight_chars.to_s + ' (' + ((one_to_eight_chars.to_f/total_lines) * 100).round(2).to_s + '%)'
-output_file.puts "More than eight characters = " + over_eight_chars.to_s + ' (' + ((over_eight_chars.to_f/total_lines) * 100).round(2).to_s + '%)'
+output_file.puts "One to six characters = #{one_to_six_chars.to_s} (#{((one_to_six_chars.to_f/total_lines) * 100).round(2).to_s}%)"
+output_file.puts "One to eight characters = #{one_to_eight_chars.to_s} (#{((one_to_eight_chars.to_f/total_lines) * 100).round(2).to_s}'%)"
+output_file.puts "More than eight characters = #{over_eight_chars.to_s} (#{((over_eight_chars.to_f/total_lines) * 100).round(2).to_s}%)"
 
 output_file.puts
 
@@ -646,131 +633,6 @@ output_file.puts "Only numeric = " + char_stats['numeric']['count'].to_s + ' (' 
 output_file.puts
 output_file.puts "First capital last symbol = " + first_cap_last_symbol.to_s + ' (' + ((first_cap_last_symbol.to_f/total_lines) * 100).round(2).to_s + '%)'
 output_file.puts "First capital last number = " + first_cap_last_num.to_s + ' (' + ((first_cap_last_num.to_f/total_lines) * 100).round(2).to_s + '%)'
-
-if external_list.length > 0
-	count_ordered = []
-	external_list.each_pair do |domain, count|
-		count_ordered << [domain, count] unless count == 0
-	end
-	external_list = count_ordered.sort do |x,y|
-		(x[1] <=> y[1]) * -1
-	end
-
-	output_file.puts
-	output_file.puts "External list (Top " + cap_at.to_s + ")"
-	disp = false
-	external_list[0, cap_at].each do |data|
-		disp = true
-		output_file.puts data[0] + " = " + data[1].to_s + ' (' + ((data[1].to_f/total_lines) * 100).round(2).to_s + '%)'
-	end
-	unless disp
-		output_file.puts "None found"
-	end
-end
-
-output_file.puts
-output_file.puts "Months"
-disp = false
-months.each_pair do |month, count|
-	unless count == 0
-		disp = true
-		output_file.puts month + " = " + count.to_s  + ' (' + ((count.to_f/total_lines) * 100).round(2).to_s + '%)'unless count == 0
-	end
-end
-unless disp
-	output_file.puts "None found"
-end
-
-output_file.puts
-output_file.puts "Days"
-disp = false
-days.each_pair do |day, count|
-	unless count == 0
-		disp = true
-		output_file.puts day + " = " + count.to_s + ' (' + ((count.to_f/total_lines) * 100).round(2).to_s + '%)' unless count == 0
-	end
-end
-unless disp
-	output_file.puts "None found"
-end
-
-output_file.puts
-output_file.puts "Months (Abreviated)"
-disp = false
-months_ab.each_pair do |month, count|
-	unless count == 0
-		disp = true
-		output_file.puts month + " = " + count.to_s + ' (' + ((count.to_f/total_lines) * 100).round(2).to_s + '%)' unless count == 0
-	end
-end
-unless disp
-	output_file.puts "None found"
-end
-
-output_file.puts
-output_file.puts "Days (Abreviated)"
-disp = false
-days_ab.each_pair do |day, count|
-	unless count == 0
-		disp = true
-		output_file.puts day + " = " + count.to_s + ' (' + ((count.to_f/total_lines) * 100).round(2).to_s + '%)' unless count == 0
-	end
-end
-unless disp
-	output_file.puts "None found"
-end
-
-output_file.puts
-output_file.puts "Includes years"
-disp = false
-years.each_pair do |number, count|
-	unless count == 0
-		disp = true
-		output_file.puts number.to_s + " = " + count.to_s  + ' (' + ((count.to_f/total_lines) * 100).round(2).to_s + '%)'unless count == 0
-	end
-end
-unless disp
-	output_file.puts "None found"
-end
-
-count_ordered = []
-years.each_pair do |year, count|
-	count_ordered << [year, count] unless count == 0
-end
-years = count_ordered.sort do |x,y|
-	(x[1] <=> y[1]) * -1
-end
-
-output_file.puts
-output_file.puts "Years (Top " + cap_at.to_s + ")"
-disp = false
-years[0, cap_at].each do |data|
-	disp = true
-	output_file.puts data[0].to_s + " = " + data[1].to_s + ' (' + ((data[1].to_f/total_lines) * 100).round(2).to_s + '%)'
-end
-unless disp
-	output_file.puts "None found"
-end
-
-output_file.puts
-output_file.puts "Colours"
-disp = false
-colours.each_pair do |colour, count|
-	unless count == 0
-		disp = true
-		output_file.puts colour + " = " + count.to_s + ' (' + ((count.to_f/total_lines) * 100).round(2).to_s + '%)' unless count == 0
-	end
-end
-unless disp
-	output_file.puts "None found"
-end
-
-
-output_file.puts
-
-#output_file.puts "Single digit on the end = " + strict_last_on_end[2].count.to_s + ' (' + ((strict_last_on_end[0].count.to_f/total_lines) * 100).round(2).to_s + '%)'
-#output_file.puts "Two digits on the end = " + strict_last_on_end[2].count.to_s + ' (' + ((strict_last_on_end[1].count.to_f/total_lines) * 100).round(2).to_s + '%)'
-#output_file.puts "Three digits on the end = " + strict_last_on_end[2].count.to_s + ' (' + ((strict_last_on_end[2].count.to_f/total_lines) * 100).round(2).to_s + '%)'
 
 output_file.puts "Single digit on the end = " + singles_on_end.to_s + ' (' + ((singles_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
 output_file.puts "Two digits on the end = " + doubles_on_end.to_s + ' (' + ((doubles_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
@@ -802,9 +664,6 @@ horiz = HorizBar.new(graph_numbers.values)
 horiz.output_file = output_file
 horiz.draw
 
-area_codes = []
-zip_codes = []
-
 digit_number = 0
 last_on_end.each do |a|
 	c = a.to_a.sort do |x,y|
@@ -821,14 +680,8 @@ last_on_end.each do |a|
 
 		c[0, cap_at].each do |d|
 			output_file.puts d[0] + " = " + d[1].to_s + ' (' + ((d[1].to_f/total_lines) * 100).round(2).to_s + '%)'
-
-			if digit_number == 3
-				area_codes << d[0]
-			end
-			if digit_number == 5
-				zip_codes << d[0]
-			end
 		end
+		
 		output_file.puts
 	end
 end
@@ -839,39 +692,6 @@ char_stats.each_pair do |name, data|
 end
 char_stats = count_ordered.sort do |x,y|
 	(x[1]['count'] <=> y[1]['count']) * -1
-end
-
-areas = {}
-area_codes.each do |code|
-	code = code.to_s
-	if US_area_codes.has_key? code
-		area = US_area_codes[code]
-		areas[code] = area
-	end
-end
-if areas.length > 0
-	output_file.puts "US Area Codes"
-	areas.each_pair do |code, area|
-		output_file.puts code + ' = ' + area[1] + " (" + area[0] + ")"
-	end
-	output_file.puts
-end
-
-if google_maps_api_key != ""
-	areas = {}
-	zip_codes.each do |zip|
-		area = lookup_by_zipcode zip.to_s, google_maps_api_key
-		unless area.nil?
-			areas[zip] = area
-		end
-	end
-	if areas.length > 0
-		output_file.puts "US Zip Codes"
-		areas.each_pair do |zip, area|
-			output_file.puts zip + ' = ' + area
-		end
-		output_file.puts
-	end
 end
 
 output_file.puts "Character sets"
@@ -893,19 +713,12 @@ char_sets_ordering.each do |name, data|
 	output_file.puts name + ": " + data['count'].to_s + " (" + ((data['count'].to_f/total_lines) * 100).round(2).to_s + "%)"
 end
 
-count_ordered = []
-hashcat_masks.each_pair do |name, data|
-	count_ordered << [name, data] unless data['count'] == 0
-end
-hashcat_masks = count_ordered.sort do |x,y|
-	(x[1]['count'] <=> y[1]['count']) * -1
+modules.each do |mod|
+	output_file.puts mod.get_results
+	output_file.puts
 end
 
 output_file.puts
-output_file.puts "Hashcat masks (Top " + cap_at.to_s + ")"
-hashcat_masks[0, cap_at].each do |name, data|
-	output_file.puts name + ": " + data['count'].to_s + " (" + ((data['count'].to_f/total_lines) * 100).round(2).to_s + "%)"
-end
 
 end
 puts time if false
