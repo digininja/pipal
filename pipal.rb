@@ -328,7 +328,8 @@ pbar = ProgressBar.new("Processing", file_line_count)
 
 catch :ctrl_c do
 	begin
-		File.open(filename, "r").each_line do |line|
+		#File.open(filename, "r").each_line do |line|
+		File.readlines(filename,:encoding => "ASCII-8BIT").each do |line|
 			begin
 				line.strip!
 				if line == ""
@@ -337,7 +338,7 @@ catch :ctrl_c do
 				end
 				# Doing this so that I can support a wider range of characters, a UK pound sign
 				# breaks the app without it
-				line.force_encoding("ASCII-8BIT")
+				#line.force_encoding("ASCII-8BIT")
 				lower_line = line.downcase
 
 				if !words.has_key?(line)
