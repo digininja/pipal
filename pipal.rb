@@ -316,20 +316,27 @@ base_words = {}
 puts "Generating stats, hit CTRL-C to finish early and dump stats on words already processed."
 puts "Please wait..."
 
-if %x{wc -l '#{filename}'}.match(/\s*([0-9]+).*/)
-	file_line_count = $1.to_i
-else
-	filesize = File.stat(filename).size
-	file_line_count = (filesize / 8).to_i
-	puts "Can't find wc to calculate the number of lines so guessing as " + file_line_count.to_s + " based on file size"
-end
+
+raw_passwords = File.readlines(filename,:encoding => "ASCII-8BIT")
+
+#if %x{wc -l '#{filename}'}.match(/\s*([0-9]+).*/)
+#	file_line_count = $1.to_i
+#else
+#	filesize = File.stat(filename).size
+#	file_line_count = (filesize / 8).to_i
+#	puts "Can't find wc to calculate the number of lines so guessing as " + file_line_count.to_s + " based on file size"
+#end
+
+file_line_count = raw_passwords.length
+puts "Processing " + file_line_count.to_s + " passwords"
 
 pbar = ProgressBar.new("Processing", file_line_count)
 
+beginning = Time.now
+
 catch :ctrl_c do
 	begin
-		#File.open(filename, "r").each_line do |line|
-		File.readlines(filename,:encoding => "ASCII-8BIT").each do |line|
+		raw_passwords.each do |line|
 			begin
 				line.strip!
 				if line == ""
@@ -576,10 +583,14 @@ Unable to open the password file
 end
 
 pbar.halt
+time_diff = Time.now - beginning
+
 
 # This is a screen puts to clear after the status bars in case the data is being written to the screen, do not add outfile to it
 puts
 puts
+
+output_file.puts "Total runtime #{time_diff} seconds"
 
 output_file.puts "Total entries = " + total_lines.to_s
 uniq_words = words.to_a.uniq
