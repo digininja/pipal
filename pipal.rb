@@ -149,6 +149,12 @@ end
 verbose = false
 cap_at = 10
 output_file = STDOUT
+custom_word_splitter = nil
+
+if File.exists?(File.join(base_path, "custom_splitter.rb"))
+	require Pathname.new(File.join(base_path, "custom_splitter.rb")).realpath
+	custom_word_splitter = Custom_word_splitter
+end
 
 Dir.glob(base_path + '/checkers_enabled/*rb').select do |f|
 	require_list = []
@@ -294,7 +300,14 @@ catch :ctrl_c do
 				end
 				# single threaded
 				modules.each do |mod|
-					mod.process_word(line, {"username" => "digininja"})
+					if !custom_word_splitter.nil?
+						word, extras = Custom_word_splitter::split(line)
+					else
+						word = line
+						extras = {}
+					end
+
+					mod.process_word(word, extras)
 				end
 
 		# Multi-threaded. With just 5 modules this makes the script about 25% slower

@@ -40,7 +40,7 @@ class Username_Checker < Checker
 		end
 	end
 
-	def process_word (word, extras = nil)
+	def process_word (word, extras)
 		if extras.has_key?("username")
 			username = extras['username']
 
@@ -75,7 +75,7 @@ class Username_Checker < Checker
 		lev_average = (@lev_total.to_f / @total_words_processed).round(2)
 		ret_str << "Average distance #{lev_average}\n"
 
-		ret_str << "Close Matches\n"
+		ret_str << "\nClose Matches\n"
 
 		# Need to sort this then have it obey the cap_at value
 		if @lev_matches.count > 0
