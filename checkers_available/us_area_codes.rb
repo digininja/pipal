@@ -395,8 +395,8 @@ class US_Area_Code_Checker < Checker
 		@areas = {}
 	end
 
-	def process_word (line)
-		if /([0-9]{3})$/.match(line)
+	def process_word (word, extras = nil)
+		if /([0-9]{3})$/.match(word)
 			area_code = $1.to_i
 			if US_area_codes.has_key?(area_code)
 				if !@areas.has_key?(area_code)
@@ -406,7 +406,7 @@ class US_Area_Code_Checker < Checker
 				end
 			end
 		end
-		@total_lines_processed += 1
+		@total_words_processed += 1
 	end
 
 	def get_results()
@@ -421,7 +421,7 @@ class US_Area_Code_Checker < Checker
 			#
 			# the -1 in the sort makes it to sort highest first
 			(@areas.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |area_code_data|
-				ret_str << "#{area_code_data[0].to_s} #{US_area_codes[area_code_data[0]][1]} (#{US_area_codes[area_code_data[0]][0]}) = #{area_code_data[1].to_s} (#{((area_code_data[1].to_f/@total_lines_processed) * 100).round(2).to_s}%)\n"
+				ret_str << "#{area_code_data[0].to_s} #{US_area_codes[area_code_data[0]][1]} (#{US_area_codes[area_code_data[0]][0]}) = #{area_code_data[1].to_s} (#{((area_code_data[1].to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
 			end
 		else
 			ret_str << "None found\n"

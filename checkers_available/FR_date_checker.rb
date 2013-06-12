@@ -23,37 +23,37 @@ class FR_Date_Checker < Checker
         end
     end
 
-    def process_word (line)
+    def process_word (word, extras = nil)
         @years.each_pair do |year, count|
-            if /#{year}/.match line
+            if /#{year}/.match word
                 @years[year] += 1
             end
         end
 
         @days_ab.each_pair do |day, count|
-            if /#{day}/i.match line
+            if /#{day}/i.match word
                 @days_ab[day] += 1
             end
         end
 
         @months_ab.each_pair do |month, count|
-            if /#{month}/i.match line
+            if /#{month}/i.match word
                 @months_ab[month] += 1
             end
         end
 
         @days.each_pair do |day, count|
-            if /#{day}/i.match line
+            if /#{day}/i.match word
                 @days[day] += 1
             end
         end
 
         @months.each_pair do |month, count|
-            if /#{month}/i.match line
+            if /#{month}/i.match word
                 @months[month] += 1
             end
         end
-        @total_lines_processed += 1
+        @total_words_processed += 1
     end
 
     def get_results()
@@ -64,11 +64,11 @@ class FR_Date_Checker < Checker
         @months.each_pair do |month, count|
             unless count == 0
                 disp = true
-                ret_str << "#{month} = #{count.to_s} (#{((count.to_f/@total_lines_processed) * 100).round(2).to_s}%)\n" unless count == 0
+                ret_str << "#{month} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
             end
         end
         unless disp
-            ret_str "Aucun trouvé\n"
+            ret_str = "Aucun trouvé\n"
         end
 
         ret_str << "\nJours\n"
@@ -76,7 +76,7 @@ class FR_Date_Checker < Checker
         @days.each_pair do |day, count|
            unless count == 0
                 disp = true
-                ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_lines_processed) * 100).round(2).to_s}%)\n" unless count == 0
+                ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
            end
         end
         unless disp
@@ -88,7 +88,7 @@ class FR_Date_Checker < Checker
         @months_ab.each_pair do |month, count|
             unless count == 0
                 disp = true
-                ret_str << "#{month} = #{count.to_s} (#{((count.to_f/@total_lines_processed) * 100).round(2).to_s}%)\n" unless count == 0
+                ret_str << "#{month} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
             end
         end
         unless disp
@@ -100,7 +100,7 @@ class FR_Date_Checker < Checker
         @days_ab.each_pair do |day, count|
             unless count == 0
                 disp = true
-                ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_lines_processed) * 100).round(2).to_s} %)\n" unless count == 0
+                ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s} %)\n" unless count == 0
             end
         end
         unless disp
@@ -112,7 +112,7 @@ class FR_Date_Checker < Checker
         @years.each_pair do |number, count|
             unless count == 0
                 disp = true
-                ret_str << "#{number.to_s} = #{count.to_s} (#{((count.to_f/@total_lines_processed) * 100).round(2).to_s}%)\n" unless count == 0
+                ret_str << "#{number.to_s} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
             end
         end
         unless disp
@@ -131,7 +131,7 @@ class FR_Date_Checker < Checker
         disp = false
         @years[0, @cap_at].each do |data|
             disp = true
-            ret_str << "#{data[0].to_s} = #{data[1].to_s} (#{((data[1].to_f/@total_lines_processed) * 100).round(2).to_s}%)\n"
+            ret_str << "#{data[0].to_s} = #{data[1].to_s} (#{((data[1].to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
         end
         unless disp
             ret_str << "Aucune trouvée\n"

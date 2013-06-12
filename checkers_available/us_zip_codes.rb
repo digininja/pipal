@@ -54,9 +54,9 @@ class US_Zip_Code_Checker < Checker
 		return nil
 	end
 
-	def process_word (line)
+	def process_word (word, extras = nil)
 		if @API_KEY != ""
-			if /([0-9]{5})$/.match(line)
+			if /([0-9]{5})$/.match(word)
 				area_code = $1.to_i
 				if US_area_codes.has_key?(area_code)
 					if !@areas.has_key?(area_code)
@@ -67,7 +67,7 @@ class US_Zip_Code_Checker < Checker
 				end
 			end
 		end
-		@total_lines_processed += 1
+		@total_words_processed += 1
 	end
 
 	def get_results()

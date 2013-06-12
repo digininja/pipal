@@ -120,15 +120,14 @@ FR_area_codes["98"] = ["Collectivités d’outre-mer"]
 
 
 class FR_area_Code_Checker < Checker
-    @areas = {}
-
 	def initialize
 		super
 		@description = "List of French area codes"
+		@areas = {}
 	end
 
-    def process_word (line)
-        if /(^([0-9]{5})|([0-9]{5})$)/.match(line)
+    def process_word (word, extras = nil)
+        if /(^([0-9]{5})|([0-9]{5})$)/.match(word)
             #to many matchs with 01234 or 98765 or 11111, etc.
             if !((($1[0].to_i == $1[1].to_i + 1) and ($1[1].to_i == $1[2].to_i + 1) and
 		($1[2].to_i == $1[3].to_i + 1) and ($1[3].to_i == $1[4].to_i + 1)) or
@@ -146,7 +145,7 @@ class FR_area_Code_Checker < Checker
                 end
             end
         end
-        @total_lines_processed += 1
+        @total_words_processed += 1
     end
 
     def get_results()
@@ -154,10 +153,10 @@ class FR_area_Code_Checker < Checker
 
         if @areas.length > 0
             (@areas.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |area_code_data|
-                ret_str << "#{area_code_data[0].to_s} #{FR_area_codes[area_code_data[0]][1]} (#{FR_area_codes[area_code_data[0]][0]}) = #{area_code_data[1].to_s} (#{((area_code_data[1].to_f/@total_lines_processed) * 100).round(2).to_s}%)\n"
+                ret_str << "#{area_code_data[0].to_s} #{FR_area_codes[area_code_data[0]][1]} (#{FR_area_codes[area_code_data[0]][0]}) = #{area_code_data[1].to_s} (#{((area_code_data[1].to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
             end
         else
-            ret_str << "Aucun trouvé\n"
+            ret_str = "Aucun trouvé\n"
         end
 
         return ret_str

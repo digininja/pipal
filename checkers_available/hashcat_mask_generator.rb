@@ -8,12 +8,12 @@ class Hashcat_Mask_Generator < Checker
 		@hashcat_masks = {}
 	end
 
-	def process_word (line)
+	def process_word (word, extras = nil)
 		# This won't work as the special replacement hits all the previous ?'s that have been replaced, 
 		# lower at the end would do the same with all the characters so can't use the order to fix this problem
 		# mask_line = line.gsub(/[a-z]/, "?l").gsub(/[A-Z]/,'?u').gsub(/[0-9]/, '?d').gsub(/[\p{Punct}]/, '?s')
 		mask_line = ""
-		line.each_char do |char|
+		word.each_char do |char|
 			case char
 				when /[a-z]/
 					mask_line << "?l"
@@ -30,7 +30,7 @@ class Hashcat_Mask_Generator < Checker
 			@hashcat_masks[mask_line] = {'count' => 0}
 		end
 		@hashcat_masks[mask_line]['count'] += 1
-		@total_lines_processed += 1
+		@total_words_processed += 1
 	end
 
 	def get_results()
@@ -45,7 +45,7 @@ class Hashcat_Mask_Generator < Checker
 		end
 
 		@hashcat_masks[0, @cap_at].each do |name, data|
-			ret_str << "#{name}: #{data['count'].to_s} (#{((data['count'].to_f/@total_lines_processed) * 100).round(2).to_s}%)\n"
+			ret_str << "#{name}: #{data['count'].to_s} (#{((data['count'].to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
 		end
 
 		return ret_str

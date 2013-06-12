@@ -5,13 +5,13 @@ class List_Checker < Checker
 		super
 	end
 
-	def process_word (line)
+	def process_word (word, extras = nil)
 		@list.each_pair do |colour, count|
-			if /#{colour}/i.match line
+			if /#{colour}/i.match word
 				@list[colour] += 1
 			end
 		end
-		@total_lines_processed += 1
+		@total_words_processed += 1
 	end
 
 	def get_results(title)
@@ -21,7 +21,7 @@ class List_Checker < Checker
 		(@list.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |colour_data|
 			unless colour_data[1] == 0
 				disp = true
-				ret_str << "#{colour_data[0]} = #{colour_data[1].to_s} (#{((colour_data[1].to_f/@total_lines_processed) * 100).round(2).to_s}%)\n"
+				ret_str << "#{colour_data[0]} = #{colour_data[1].to_s} (#{((colour_data[1].to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
 			end
 		end
 		unless disp

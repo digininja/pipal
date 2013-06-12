@@ -5,13 +5,24 @@ class HorizBar
 	WIDTH = 72
 	HEIGHT = 16
 	attr :output_file, true
+	attr_reader :graph
 
 	def initialize(array)
 		@values = array
 		@output_file = STDOUT
+		@graph = nil
 	end
 
 	def draw
+		if @graph.nil?
+			self.generate
+		end
+		@output_file.puts @graph
+	end
+
+	def generate
+		@graph = ""
+
 		#Adjust X axis when there are more than WIDTH cols
 		if @values.length > WIDTH then
 			old_values = @values;
@@ -40,14 +51,15 @@ class HorizBar
 			num= f*HEIGHT/max
 			(HEIGHT - 1).downto(HEIGHT - 1 - num){|j| display[j][i] = '|'}
 		end    
-		display.each{|ar| ar.each{|e| @output_file.putc e}; @output_file.puts "\n"} #now print
+		display.each{|ar| ar.each{|e| @graph << e}; @graph << "\n"} #now print
 
 		no_of_digits = (@values.length - 1).to_s.length
-		0.upto(no_of_digits) do |digit_number|
+
+		0.upto(no_of_digits - 1) do |digit_number|
 			0.upto(@values.length - 1) do |x|
-				@output_file.print sprintf("%0#{no_of_digits}d", x)[digit_number]
+				@graph << sprintf("%0#{no_of_digits}d", x)[digit_number]
 			end
-			@output_file.puts
+			@graph << "\n"
 		end
 	end
 end

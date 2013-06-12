@@ -21,7 +21,9 @@ class External_List_Checker < Checker
 		end
 
 		if @file_name.nil?
-			raise Exception.new(true), "External File Checker - No file specified"
+			puts "External File Checker - No file specified, aborting"
+			exit 1
+#			raise Exception.new(true), "External File Checker - No file specified"
 		end
 	end
 
@@ -41,14 +43,14 @@ class External_List_Checker < Checker
 		end
 	end
 
-	def process_word (line)
+	def process_word (word, extras = nil)
 		@external_list.each_pair do |domain, count|
-			if /#{Regexp.quote(domain)}/i.match line
+			if /#{Regexp.quote(domain)}/i.match word
 				@external_list[domain] += 1
 			end
 		end
 
-		@total_lines_processed += 1
+		@total_words_processed += 1
 	end
 
 	def get_results()
@@ -65,7 +67,7 @@ class External_List_Checker < Checker
 			disp = false
 			@external_list[0, @cap_at].each do |data|
 				disp = true
-				ret_str << "#{data[0]} = #{data[1].to_s} (#{((data[1].to_f/@total_lines_processed) * 100).round(2).to_s}%)\n"
+				ret_str << "#{data[0]} = #{data[1].to_s} (#{((data[1].to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
 			end
 			unless disp
 				ret_str << "None found\n"

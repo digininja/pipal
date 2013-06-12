@@ -26,11 +26,11 @@ require'uri'
 require'json'
 require "pathname"
 
+VERSION = "2.0"
+
 # Find out what our base path is
 base_path = File.expand_path(File.dirname(__FILE__))
-
-# Load our custom syntax node classes so the parser can use them
-require File.join(base_path, 'horizbar.rb')
+require File.join(base_path, 'base_checker.rb')
 require File.join(base_path, 'progressbar.rb')
 
 if RUBY_VERSION =~ /1\.8/
@@ -42,28 +42,6 @@ end
 class PipalException < Exception
 end
 
-class Checker
-	attr_writer :cap_at
-	attr_reader :description
-	attr_reader :cli_params
-
-	def initialize
-		@cap_at = 10
-		@total_lines_processed = 0
-		@description = "No description given"
-		@cli_params = nil
-	end
-
-	def parse_params opts
-	end
-
-	def process_word (line)
-	end
-
-	def get_results (total_lines_processed)
-	end
-end
-
 @checkers = []
 
 def register_checker (class_name)
@@ -72,86 +50,13 @@ end
 
 trap("SIGINT") { throw :ctrl_c }
 
-time = Benchmark.measure do
-
-char_stats = {
-"loweralpha" => {'regex' => /^[a-z]+$/, "count" => 0},
-"upperalpha" => {'regex' => /^[A-Z]+$/, "count" => 0},
-"numeric" => {'regex' => /^[0-9]+$/, "count" => 0},
-"special" => {'regex' => /^[\p{Punct}]+$/, "count" => 0},
-
-"loweralphanum" => {'regex' => /^[a-z0-9]+$/, "count" => 0},
-"upperalphanum" => {'regex' => /^[A-Z0-9]+$/, "count" => 0},
-"mixedalpha" => {'regex' => /^[a-zA-Z]+$/, "count" => 0},
-"loweralphaspecial" => {'regex' => /^[a-z\p{Punct}]+$/, "count" => 0},
-"upperalphaspecial" => {'regex' => /^[A-Z\p{Punct}]+$/, "count" => 0},
-"specialnum" => {'regex' => /^[\p{Punct}0-9]+$/, "count" => 0},
-
-"mixedalphanum" => {'regex' => /^[a-zA-Z0-9]+$/, "count" => 0},
-"loweralphaspecialnum" => {'regex' => /^[a-z\p{Punct}0-9]+$/, "count" => 0},
-"mixedalphaspecial" => {'regex' => /^[A-Za-z\p{Punct}]+$/, "count" => 0},
-"upperalphaspecialnum" => {'regex' => /^[A-Z\p{Punct}0-9]+$/, "count" => 0},
-
-"mixedalphaspecialnum" => {'regex' => /^[A-Za-z\p{Punct}0-9]+$/, "count" => 0},
-}
-
-char_sets_ordering = {
-"stringdigit" => {"regex" => /^[a-z]+[0-9]+$/, "count" => 0},
-"allstring" => {"regex" => /^[a-z]+$/, "count" => 0},
-"digitstring" => {"regex" => /^[0-9]+[a-z]+$/, "count" => 0},
-"stringdigitstring" => {"regex" => /^[a-z]+[0-9]+[a-z]+$/, "count" => 0},
-"alldigit" => {"regex" => /^[0-9]+$/, "count" => 0},
-"digitstringdigit" => {"regex" => /^[0-9]+[a-z]+[0-9]+$/, "count" => 0},
-"stringspecialdigit" => {"regex" => /^[a-z]+[\p{Punct}]+[0-9]+$/, "count" => 0},
-"stringspecialstring" => {"regex" => /^[a-z]+[\p{Punct}]+[a-z]+$/, "count" => 0},
-"stringspecial" => {"regex" => /^[a-z]+[\p{Punct}]+$/, "count" => 0},
-"specialstring" => {"regex" => /^[\p{Punct}]+[a-z]+$/, "count" => 0},
-"specialstringspecial" => {"regex" => /^[\p{Punct}]+[a-z]+[\p{Punct}]+$/, "count" => 0},
-"allspecial" => {"regex" => /^[\p{Punct}]+$/, "count" => 0},
-"othermask" => {"regex" => /^.*$/, "count" => 0}
-}
-
-words = {}
-total_lines = 0
-
-one_to_six_chars = 0
-one_to_eight_chars = 0
-over_eight_chars = 0
-#only_lower_alpha_chars = 0
-#only_upper_alpha_chars = 0
-#only_numeric_chars = 0
-
-first_cap_last_num = 0
-first_cap_last_num_re = /^[A-Z].*[0-9]$/
-first_cap_last_symbol = 0
-first_cap_last_symbol_re = /^[A-Z].*[\p{Punct}]$/
-
-# this is the count of words with 1, 2 and 3 numbers on the end
-singles_on_end_re = /[^0-9]+([0-9]{1})$/
-singles_on_end = 0
-doubles_on_end_re = /[^0-9]+([0-9]{2})$/
-doubles_on_end = 0
-triples_on_end_re =/[^0-9]+([0-9]{3})$/ 
-triples_on_end = 0
-
-# this is the actual last number on the end, single digit
-last_on_end = []
-0.upto(4) do |no_of_digits|
-	last_on_end[no_of_digits] = {}
-end
-
-# last two and three numbers on the end
-last_two_on_end = {}
-last_three_on_end = {}
+# uncomment this and its pair towards the end to benchmark the app
+#time = Benchmark.measure do
 
 class String
 	def is_numeric?
 		Integer self rescue false
 	end
-end
-
-def is_numeric val
-	return val.to_s =~ /^[0-9]+$/
 end
 
 opts = GetoptLong.new(
@@ -160,13 +65,19 @@ opts = GetoptLong.new(
 	[ '--output', "-o" , GetoptLong::REQUIRED_ARGUMENT ],
 	[ '--external', "-e" , GetoptLong::REQUIRED_ARGUMENT ],
 	[ '--gkey', GetoptLong::REQUIRED_ARGUMENT ],
-	[ "-v" , GetoptLong::NO_ARGUMENT ],
+	[ "--verbose", "-v" , GetoptLong::NO_ARGUMENT ],
 	[ "--list-checkers" , GetoptLong::NO_ARGUMENT ],
 )
 
+def puts_msg_with_header (msg)
+	puts"pipal #{VERSION} Robin Wood (robin@digininja.org) (www.digininja.org)\n"
+	puts msg
+	puts "\n"
+end
+
 # Display the usage
 def usage
-	puts"pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+	puts"pipal #{VERSION} Robin Wood (robin@digininja.org) (www.digininja.org)
 
 Usage: pipal [OPTION] ... FILENAME
 	--help, -h: show help
@@ -175,6 +86,7 @@ Usage: pipal [OPTION] ... FILENAME
 	--external, -e <filename>: external file to compare words against
 	--gkey <Google Maps API key>: to allow zip code lookups (optional)
 	--list-checkers: Show the available checkers and which are enabled
+	--verbose, -v: Verbose
 
 	FILENAME: The file to count
 
@@ -219,7 +131,7 @@ def list_checkers
 		all_checkers[class_name] = {'description' => mod.description, 'enabled' => false}
 	end
 
-	puts "pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)"
+	puts "pipal #{VERSION} Robin Wood (robin@digininja.org) (www.digininja.org)"
 	puts
 	puts "You have the following Checkers on your system"
 	puts "=============================================="
@@ -231,16 +143,13 @@ def list_checkers
 	puts
 
 	exit
-
 end
 
+# Defaults
+verbose = false
 cap_at = 10
 output_file = STDOUT
-external_list = {}
-# Need to find a way to handle this properly
-google_maps_api_key = ""
 
-# these have to go after the class above
 Dir.glob(base_path + '/checkers_enabled/*rb').select do |f|
 	require_list = []
 	if !File.directory? f
@@ -259,9 +168,11 @@ modules = []
 
 @checkers.each do |class_name|
 	mod = Object::const_get(class_name).new
-	mod.cap_at = cap_at
 	modules << mod
 	
+	# If the module has any parameters then they 
+	# will be in the cli_params attribute as an array
+	# so go through it and add them all to the main options list
 	if !mod.cli_params.nil?
 		mod.cli_params.each do |param|
 			opts.set_options(param)
@@ -270,6 +181,8 @@ modules = []
 end
 
 begin
+	# Having to store them as once you've parsed through opts once you can't do it
+	# again as far as I can tell, all the values disappear.
 	stored_opts = {}
 
 	opts.each do |opt, arg|
@@ -284,19 +197,11 @@ begin
 				if arg.is_numeric?
 					cap_at = arg.to_i
 					if cap_at <= 0
-						puts"pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
-
-Please enter a positive number of lines
-
-"
+						puts_msg_with_header("Please enter a positive number of lines")
 						exit 1
 					end
 				else
-					puts"pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
-
-Invalid number of lines
-
-"
+					puts_msg_with_header("Invalid number of lines")
 					exit 1
 				end
 			when "--gkey"
@@ -308,38 +213,31 @@ Invalid number of lines
 							external_list[word.force_encoding("ASCII-8BIT").strip] = 0 unless word.force_encoding("ASCII-8BIT").strip == ''
 						end
 					rescue Errno::EACCES => e
-						puts"pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
-
-Unable to open external file
-
-"
+						puts_msg_with_header("Unable to open external file")
 						exit 1
 					end
 				else
-					puts"pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
-
-Unable to find external file
-
-"
+					puts_msg_with_header("Unable to find external file")
 					exit 1
 				end
 			when "--output"
 				begin
 					output_file = File.new(arg, "w")
 				rescue Errno::EACCES => e
-					puts"pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
-
-Unable to open output file
-
-"
+					puts_msg_with_header("Unable to open output file")
 					exit 1
 				end
+			when "--verbose"
+				verbose = true
 		end
 	end
 	puts stored_opts
 
 	# allow each of the modules to pull out the CLI params they require
+	# and pass through any global values
 	modules.each do |mod|
+		mod.verbose = verbose
+		mod.cap_at = cap_at
 		mod.parse_params stored_opts
 	end
 rescue GetoptLong::InvalidOption => e
@@ -361,28 +259,16 @@ rescue => e
 end
 
 if ARGV.length != 1
-	puts"pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
-
-Please specify the file to count
-
-"
+	puts_msg_with_header("Please specify the file to count")
 	exit 1
 end
 
 filename = ARGV.shift
 
 if !File.exist? filename
-	puts"pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
-
-Can't find the password file
-
-"
+	puts_msg_with_header("Can't find the password file")
 	exit 2
 end
-
-lengths = []
-max_length = 0
-base_words = {}
 
 puts "Generating stats, hit CTRL-C to finish early and dump stats on words already processed."
 puts "Please wait..."
@@ -406,19 +292,9 @@ catch :ctrl_c do
 					pbar.inc
 					next
 				end
-				# Doing this so that I can support a wider range of characters, a UK pound sign
-				# breaks the app without it
-				line.force_encoding("ASCII-8BIT")
-				lower_line = line.downcase
-
-				if !words.has_key?(line)
-					words[line] = 0
-				end
-				words[line] += 1
-
 				# single threaded
 				modules.each do |mod|
-					mod.process_word(line)
+					mod.process_word(line, {"username" => "digininja"})
 				end
 
 		# Multi-threaded. With just 5 modules this makes the script about 25% slower
@@ -430,99 +306,8 @@ catch :ctrl_c do
 		#		end
 		#		threads.each do | a_thread | a_thread.join end
 
-				# strip any non-alpha from the start or end, I was going to strip all non-alpha
-				# but then found a list with Unc0rn as a very common base. Stripping all non-alpha
-				# would leave with Uncrn which doesn't really make any sense as without the 133t speak
-				# it is out of context.
-				#
-				# If you want all non-alpha stripped use the following line instead
-				#
-				# word_just_alpha = lower_line.gsub(/[^a-z]*/, "")
-				#
-				word_just_alpha = lower_line.gsub(/^[^a-z]*/, "").gsub(/[^a-z]*$/, '')
-				if word_just_alpha.length > 3
-					if !base_words.has_key?(word_just_alpha)
-						base_words[word_just_alpha] = 0
-					end
-					base_words[word_just_alpha] += 1
-				end
-
-				if lengths[line.length].nil?
-					lengths[line.length] = 0
-				end
-				lengths[line.length] += 1
-
-				if line.length < 9
-					one_to_eight_chars += 1
-				end
-
-				if line.length < 7
-					one_to_six_chars += 1
-				end
-
-				if line.length > 8
-					over_eight_chars += 1
-				end
-
-				if line =~ first_cap_last_symbol_re
-					first_cap_last_symbol += 1
-				end
-
-				if line =~ first_cap_last_num_re
-					first_cap_last_num += 1
-				end
-
-				if singles_on_end_re.match line
-					singles_on_end += 1
-				end
-				
-				# Can't merge these two as the first is strict, 2 digits on the end, the second 
-				# just wants the last two digits regardless
-				if doubles_on_end_re.match line
-					doubles_on_end += 1
-				end
-
-				if triples_on_end_re.match line
-				#if line =~ /[^0-9]+([0-9]{3})$/ 
-					triples_on_end += 1
-				end
-				
-				1.upto(5) do |no_of_digits|
-					if /([0-9]{#{no_of_digits}})$/.match line
-						last_numbers = $1
-						if !last_on_end[no_of_digits - 1].has_key?(last_numbers)
-							last_on_end[no_of_digits - 1][last_numbers] = 0
-						end
-						last_on_end[no_of_digits - 1][last_numbers] += 1
-					end
-
-				end
-				
-				char_stats.each_pair do |name, data|
-					begin
-						if line =~ data['regex']
-							char_stats[name]['count'] += 1
-							break
-						end
-					rescue Encoding::CompatibilityError
-						puts "Encoding problem found with password: " + line
-					end
-				end
-
-				char_sets_ordering.each_pair do |name, data|
-					begin
-						if lower_line =~ data['regex']
-							char_sets_ordering[name]['count'] += 1
-							break
-						end
-					rescue Encoding::CompatibilityError
-						puts "Encoding problem found with password: " + line
-					end
-				end
 
 				pbar.inc
-
-				total_lines += 1
 			rescue ArgumentError => e
 				puts "Encoding problem processing word: " + line
 				pbar.inc
@@ -540,11 +325,7 @@ catch :ctrl_c do
 			end
 		end
 	rescue Errno::EACCES => e
-		puts"pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
-
-Unable to open the password file
-
-"
+		puts_msg_with_header("Unable to open the password file")
 		exit 1
 	rescue => e
 		puts "Something went wrong, please report it to robin@digininja.org along with these messages:"
@@ -567,152 +348,6 @@ pbar.halt
 puts
 puts
 
-output_file.puts "Total entries = #{total_lines.to_s}"
-uniq_words = words.to_a.uniq
-output_file.puts "Total unique entries = #{uniq_words.length.to_s}"
-uniq_words = Array.new(words.to_a.uniq)
-
-output_file.puts
-output_file.puts "Top #{cap_at.to_s} passwords"
-# The default is to sort lowest to highest, the -1 just inverts that
-words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, cap_at].each { |elem|
-	percentage = (elem[1].to_f / total_lines) * 100
-	output_file.puts "#{elem[0]} = #{elem[1].to_s} (#{percentage.round(2).to_s}%)"
-}
-
-output_file.puts
-output_file.puts "Top #{cap_at.to_s} base words"
-base_words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, cap_at].each { |elem|
-	percentage = (elem[1].to_f / total_lines) * 100
-	output_file.puts "#{elem[0]} = #{elem[1].to_s} (#{percentage.round(2).to_s}%)"
-}
-
-output_file.puts
-output_file.puts "Password length (length ordered)"
-
-length_ordered = []
-0.upto(lengths.count) do |len|
-	if lengths[len].nil?
-		lengths[len] = 0
-	end
-	percentage = ((lengths[len].to_f / total_lines) * 100)
-	output_file.puts "#{len.to_s} = #{lengths[len].to_s} (#{percentage.round(2).to_s}%)" if lengths[len] > 0
-	
-	pair = [len, lengths[len], percentage]
-	length_ordered << pair
-end
-
-length_ordered.sort! do |x,y|
-	y[1] <=> x[1]
-end
-
-output_file.puts
-output_file.puts "Password length (count ordered)"
-length_ordered.each do |pair|
-	output_file.puts "#{pair[0].to_s} = #{pair[1].to_s} (#{pair[2].round(2).to_s}%)" if pair[1] > 0
-end
-
-output_file.puts
-
-horiz = HorizBar.new(lengths)
-horiz.output_file = output_file
-horiz.draw
-
-output_file.puts "One to six characters = #{one_to_six_chars.to_s} (#{((one_to_six_chars.to_f/total_lines) * 100).round(2).to_s}%)"
-output_file.puts "One to eight characters = #{one_to_eight_chars.to_s} (#{((one_to_eight_chars.to_f/total_lines) * 100).round(2).to_s}'%)"
-output_file.puts "More than eight characters = #{over_eight_chars.to_s} (#{((over_eight_chars.to_f/total_lines) * 100).round(2).to_s}%)"
-
-output_file.puts
-
-output_file.puts "Only lowercase alpha = " + char_stats['loweralpha']['count'].to_s + ' (' + ((char_stats['loweralpha']['count'].to_f/total_lines) * 100).round(2).to_s + '%)'
-output_file.puts "Only uppercase alpha = " + char_stats['upperalpha']['count'].to_s + ' (' + ((char_stats['upperalpha']['count'].to_f/total_lines) * 100).round(2).to_s + '%)'
-output_file.puts "Only alpha = " + (char_stats['upperalpha']['count'] + char_stats['loweralpha']['count']).to_s + ' (' + (((char_stats['upperalpha']['count'] + char_stats['loweralpha']['count']).to_f/total_lines) * 100).round(2).to_s + '%)'
-
-output_file.puts "Only numeric = " + char_stats['numeric']['count'].to_s + ' (' + ((char_stats['numeric']['count'].to_f/total_lines) * 100).round(2).to_s + '%)'
-
-output_file.puts
-output_file.puts "First capital last symbol = " + first_cap_last_symbol.to_s + ' (' + ((first_cap_last_symbol.to_f/total_lines) * 100).round(2).to_s + '%)'
-output_file.puts "First capital last number = " + first_cap_last_num.to_s + ' (' + ((first_cap_last_num.to_f/total_lines) * 100).round(2).to_s + '%)'
-
-output_file.puts "Single digit on the end = " + singles_on_end.to_s + ' (' + ((singles_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
-output_file.puts "Two digits on the end = " + doubles_on_end.to_s + ' (' + ((doubles_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
-output_file.puts "Three digits on the end = " + triples_on_end.to_s + ' (' + ((triples_on_end.to_f/total_lines) * 100).round(2).to_s + '%)'
-
-output_file.puts
-output_file.puts "Last number"
-disp = false
-
-graph_numbers = {0=>0, 1=>0, 2=>0, 3=>0, 4=>0, 5=>0, 6=>0, 7=>0, 8=>0, 9=>0}
-
-c = last_on_end[0].to_a.sort do |x,y|
-	(x[0] <=> y[0])
-end
-
-c.each do |number, count|
-	unless count == 0
-		disp = true
-		output_file.puts number.to_s + " = " + count.to_s + ' (' + ((count.to_f/total_lines) * 100).round(2).to_s + '%)' unless count == 0
-	end
-	graph_numbers[number.to_i] = count
-end
-unless disp
-	output_file.puts "None found"
-end
-
-output_file.puts
-horiz = HorizBar.new(graph_numbers.values)
-horiz.output_file = output_file
-horiz.draw
-
-digit_number = 0
-last_on_end.each do |a|
-	c = a.to_a.sort do |x,y|
-		(x[1] <=> y[1]) * -1
-	end
-
-	digit_number += 1
-	if c.count > 0
-		if (digit_number == 1)
-			output_file.puts "Last digit"
-		else
-			output_file.puts "Last " + digit_number.to_s + " digits (Top " + cap_at.to_s + ")"
-		end
-
-		c[0, cap_at].each do |d|
-			output_file.puts d[0] + " = " + d[1].to_s + ' (' + ((d[1].to_f/total_lines) * 100).round(2).to_s + '%)'
-		end
-		
-		output_file.puts
-	end
-end
-
-count_ordered = []
-char_stats.each_pair do |name, data|
-	count_ordered << [name, data] unless data['count'] == 0
-end
-char_stats = count_ordered.sort do |x,y|
-	(x[1]['count'] <=> y[1]['count']) * -1
-end
-
-output_file.puts "Character sets"
-char_stats.each do |name, data|
-	output_file.puts name + ": " + data['count'].to_s + " (" + ((data['count'].to_f/total_lines) * 100).round(2).to_s + "%)"
-end
-
-count_ordered = []
-char_sets_ordering.each_pair do |name, data|
-	count_ordered << [name, data] unless data['count'] == 0
-end
-char_sets_ordering = count_ordered.sort do |x,y|
-	(x[1]['count'] <=> y[1]['count']) * -1
-end
-
-output_file.puts
-output_file.puts "Character set ordering"
-char_sets_ordering.each do |name, data|
-	output_file.puts name + ": " + data['count'].to_s + " (" + ((data['count'].to_f/total_lines) * 100).round(2).to_s + "%)"
-end
-
 modules.each do |mod|
 	output_file.puts mod.get_results
 	output_file.puts
@@ -720,5 +355,6 @@ end
 
 output_file.puts
 
-end
-puts time if false
+# Companion to the commented out benchmark at the top
+#end
+#puts time
