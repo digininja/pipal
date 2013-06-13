@@ -141,10 +141,16 @@ cap_at = 10
 output_file = STDOUT
 custom_word_splitter = nil
 
+# If there is a customer Splitter sylinked in then require it in
+# and it will automatically be used
+
 if File.exists?(File.join(base_path, "custom_splitter.rb"))
 	require Pathname.new(File.join(base_path, "custom_splitter.rb")).realpath
 	custom_word_splitter = Custom_word_splitter
 end
+
+# Loop thorugh all the Checkers which have been enabled and 
+# require them in
 
 Dir.glob(base_path + '/checkers_enabled/*rb').select do |f|
 	require_list = []
@@ -158,6 +164,11 @@ Dir.glob(base_path + '/checkers_enabled/*rb').select do |f|
 		# and require that instead
 		require Pathname.new(fn).realpath
 	end
+end
+
+if @checkers.count == 0
+	puts_msg_with_header("No Checkers enabled, please read README_modular for more information")
+	exit 1
 end
 
 modules = []
