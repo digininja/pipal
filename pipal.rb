@@ -20,7 +20,6 @@
 #
 
 require 'benchmark'
-require 'getoptlong'
 require'net/http'
 require'uri'
 require'json'
@@ -32,6 +31,7 @@ VERSION = "3.0 alpha"
 base_path = File.expand_path(File.dirname(__FILE__))
 require File.join(base_path, 'base_checker.rb')
 require File.join(base_path, 'progressbar.rb')
+require File.join(base_path, 'pipal_getoptlong.rb')
 
 if RUBY_VERSION =~ /1\.8/
 	puts "Sorry, Pipal only works correctly on Ruby >= 1.9.x."
@@ -58,16 +58,6 @@ class String
 		Integer self rescue false
 	end
 end
-
-opts = GetoptLong.new(
-	[ '--help', '-h', "-?", GetoptLong::NO_ARGUMENT ],
-	[ '--top', "-t" , GetoptLong::REQUIRED_ARGUMENT ],
-	[ '--output', "-o" , GetoptLong::REQUIRED_ARGUMENT ],
-	[ '--external', "-e" , GetoptLong::REQUIRED_ARGUMENT ],
-	[ '--gkey', GetoptLong::REQUIRED_ARGUMENT ],
-	[ "--verbose", "-v" , GetoptLong::NO_ARGUMENT ],
-	[ "--list-checkers" , GetoptLong::NO_ARGUMENT ],
-)
 
 def puts_msg_with_header (msg)
 	puts"pipal #{VERSION} Robin Wood (robin@digininja.org) (www.digininja.org)\n"
@@ -172,6 +162,16 @@ end
 
 modules = []
 
+opts = PipalGetoptLong.new(
+	[ '--help', '-h', GetoptLong::NO_ARGUMENT ],
+	[ '--top', "-t" , GetoptLong::REQUIRED_ARGUMENT ],
+	[ '--output', "-o" , GetoptLong::REQUIRED_ARGUMENT ],
+	[ '--external', "-e" , GetoptLong::REQUIRED_ARGUMENT ],
+	[ '--gkey', GetoptLong::REQUIRED_ARGUMENT ],
+	[ "--verbose", "-v" , GetoptLong::NO_ARGUMENT ],
+	[ "--list-checkers" , GetoptLong::NO_ARGUMENT ],
+)
+
 @checkers.each do |class_name|
 	mod = Object::const_get(class_name).new
 	modules << mod
@@ -181,7 +181,7 @@ modules = []
 	# so go through it and add them all to the main options list
 	if !mod.cli_params.nil?
 		mod.cli_params.each do |param|
-			opts.set_options(param)
+			opts.add_option(param)
 		end
 	end
 end
@@ -237,7 +237,6 @@ begin
 				verbose = true
 		end
 	end
-	puts stored_opts
 
 	# allow each of the modules to pull out the CLI params they require
 	# and pass through any global values
@@ -265,7 +264,7 @@ rescue => e
 end
 
 if ARGV.length != 1
-	puts_msg_with_header("Please specify the file to count")
+	puts_msg_with_header("Please specify the file to analyse")
 	exit 1
 end
 
