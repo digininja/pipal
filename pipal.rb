@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 
 # == Pipal: Statistical analysis on password dumps
 # 
@@ -322,7 +323,11 @@ catch :ctrl_c do
 						extras = {}
 					end
 
-					mod.process_word(word, extras)
+					# allow the custom splitter to pass back nil
+					# which indicates that the line isn't to be parsed
+					if !word.nil?
+						mod.process_word(word, extras)
+					end
 				end
 
 		# Multi-threaded. With just 5 modules this makes the script about 25% slower
@@ -338,9 +343,9 @@ catch :ctrl_c do
 				pbar.inc
 			rescue ArgumentError => e
 				puts "Encoding problem processing word: " + line
-				puts e.inspect
-				puts e.backtrace
-				exit
+			#	puts e.inspect
+			#	puts e.backtrace
+			#	exit
 				pbar.inc
 			rescue => e
 				puts "Something went wrong, please report it to robin@digininja.org along with these messages:"

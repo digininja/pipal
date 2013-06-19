@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Find out what our base path is
 base_path = File.expand_path(File.dirname(__FILE__))
 require File.join(base_path, '../horizbar.rb')
