@@ -15,7 +15,7 @@ class Checker
 	def parse_params opts
 	end
 
-	def process_word (word)
+	def process_word (word, extras = nil)
 	end
 
 	def get_results (total_words_processed)

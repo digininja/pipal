@@ -90,14 +90,20 @@ def list_checkers
 	# Find out what our base path is
 	base_path = File.expand_path(File.dirname(__FILE__))
 
+	# doing it like this so that the files can be symlinked in
+	# in numeric order
+	checker_names = []
 	Dir.glob(base_path + '/checkers_enabled/*rb').select do |fn|
 		if !File.directory? fn
-			# Ruby doesn't seem to like doing a require
-			# on a symlink so this finds the ultimate target
-			# of the link (i.e. will travel multiple links)
-			# and require that instead
-			require Pathname.new(fn).realpath
+			checker_names << fn
 		end
+	end
+	checker_names.sort.each do |name|
+		# Ruby doesn't seem to like doing a require
+		# on a symlink so this finds the ultimate target
+		# of the link (i.e. will travel multiple links)
+		# and require that instead
+		require Pathname.new(fn).realpath
 	end
 
 	@checkers.each do |class_name|
@@ -151,19 +157,18 @@ end
 
 # Loop thorugh all the Checkers which have been enabled and 
 # require them in
-
+require_list = []
 Dir.glob(base_path + '/checkers_enabled/*rb').select do |f|
-	require_list = []
 	if !File.directory? f
 		require_list << f
 	end
-	require_list.sort.each do |fn|
-		# Ruby doesn't seem to like doing a require
-		# on a symlink so this finds the ultimate target
-		# of the link (i.e. will travel multiple links)
-		# and require that instead
-		require Pathname.new(fn).realpath
-	end
+end
+require_list.sort.each do |fn|
+	# Ruby doesn't seem to like doing a require
+	# on a symlink so this finds the ultimate target
+	# of the link (i.e. will travel multiple links)
+	# and require that instead
+	require Pathname.new(fn).realpath
 end
 
 if @checkers.count == 0
@@ -333,6 +338,9 @@ catch :ctrl_c do
 				pbar.inc
 			rescue ArgumentError => e
 				puts "Encoding problem processing word: " + line
+				puts e.inspect
+				puts e.backtrace
+				exit
 				pbar.inc
 			rescue => e
 				puts "Something went wrong, please report it to robin@digininja.org along with these messages:"

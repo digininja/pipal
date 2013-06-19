@@ -12,7 +12,7 @@ class US_Zip_Code_Checker < Checker
 	def initialize
 		super
 		@description = "List of US zip codes"
-		@zip_codes = []
+		@zip_codes = {}
 	end
 
 	def lookup_by_zipcode(zip)
@@ -57,13 +57,11 @@ class US_Zip_Code_Checker < Checker
 	def process_word (word, extras = nil)
 		if @API_KEY != ""
 			if /([0-9]{5})$/.match(word)
-				area_code = $1.to_i
-				if US_area_codes.has_key?(area_code)
-					if !@areas.has_key?(area_code)
-						@areas[area_code] = 1
-					else
-						@areas[area_code] += 1
-					end
+				zip_code = $1.to_i
+				if !@zip_codes.has_key?(zip_code)
+					@zip_codes[zip_code] = 1
+				else
+					@zip_codes[zip_code] += 1
 				end
 			end
 		end
