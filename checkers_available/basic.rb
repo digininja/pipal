@@ -210,7 +210,7 @@ class Basic_Checker < Checker
 		ret_str << "\nPassword length (length ordered)\n"
 
 		length_ordered = []
-		0.upto(@lengths.count) do |len|
+		0.upto(@lengths.count - 1) do |len|
 			if @lengths[len].nil?
 				@lengths[len] = 0
 			end
