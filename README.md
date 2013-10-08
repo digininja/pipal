@@ -3,7 +3,7 @@ Pipal, Password Analyser
 
 Copyright(c) 2012, Robin Wood <robin@digininja.org>
 
-On most internal pen-tests I do generally manage to get a password dump from
+On most internal pen-tests I do, I generally manage to get a password dump from
 the DC. To do some basic analysis on this I wrote Counter and since I originally
 released it I've made quite a few mods to it to generate extra stats that are
 useful when doing reports to management. 
