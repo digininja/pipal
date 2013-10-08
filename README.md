@@ -3,7 +3,7 @@ Pipal, Password Analyser
 
 Copyright(c) 2012, Robin Wood <robin@digininja.org>
 
-On most internal pen-tests I do I generally manage to get a password dump from
+On most internal pen-tests I do generally manage to get a password dump from
 the DC. To do some basic analysis on this I wrote Counter and since I originally
 released it I've made quite a few mods to it to generate extra stats that are
 useful when doing reports to management. 
@@ -13,8 +13,9 @@ could use to analyse some passwords he had. I pointed him to Counter and said if
 he had any suggestions for additions to let me know. He did just that and over
 the last month between us we have come up with a load of new features which we
 both think will help anyone with a large dump of cracked passwords to analyse.
-We also got some input from well known password analysts Matt Weir and Martin
-Bos who I'd like to give a big thanks to. 
+We also got some input from well known password analysts 
+[Matt Weir](http://reusablesec.blogspot.com/) and Martin Bos who I'd like to give 
+a big thanks to. 
 
 I have to point out before going on, all this tool does is to give you the stats
 and the information to help you analyse the passwords. The real work is done by
@@ -24,12 +25,13 @@ Seeing as there have been so many changes to the underlying code I also decided
 to change the name (see below) and do a full new release.
 
 So, what does this new version do? The best way to describe it is to see some
-examples so go to the Pipal project page at www.digininja.org/projects/pipal.php
+examples so go to the [Pipal project page](www.digininja.org/projects/pipal.php)
 for a full walk through of a sample analysis.
 
 Install / Usage
 ===============
-The app will only work with Ruby 1.9.x, if you try to run it in any previous
+
+The app will only work with `Ruby 1.9.x`, if you try to run it in any previous
 versions you will get a warning and the app will close.
 
 Pipal is completely self contained and requires no gems installing so should
@@ -37,6 +39,7 @@ work on any vanilla Ruby install.
 
 Usage is fairly simple, -? will give you full instructions:
 
+```ruby
 $ ./pipal.rb -?
 pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
 
@@ -48,10 +51,11 @@ Usage: pipal [OPTION] ... FILENAME
 		--gkey <Google Maps API key>: to allow zip code lookups (optional)
 
         FILENAME: The file to count 
+```
 
 When you run the app you'll get a nice progress bar which gives you a rough idea
 of how long the app will take to run. If you want to stop it at any point
-hitting ctrl-c will stop the parsing and will dump out the stats generated so
+hitting Ctrl-c will stop the parsing and will dump out the stats generated so
 far.
 
 The progress bar is based on a line count from the file which it gets this using
@@ -59,8 +63,9 @@ the wc command. If it can't find wc it will make a guess at the number of lines
 based on the file size and an average line length of 8 bytes so the progress bar
 may not be fully accurate but should still give you an idea.
 
-The Google Maps API key is supposed to be used by Google to only allow access to
-their API to registered users. I assumed this was true and registered for a key
+[The Google Maps API](https://developers.google.com/maps/) key is supposed to be
+used by Google to only allow access to their API to registered users. 
+I assumed this was true and registered for a key
 but in putting together this release I found that it will take any value and
 still do the look up. This may be a bug at the Google end or deliberate and may
 change any any time so I'd suggest grabbing a key just in case. To use it you
@@ -122,7 +127,6 @@ know.
 
 Licence
 =======
-This project released under the Creative Commons Attribution-Share Alike 2.0
-UK: England & Wales
 
-( http://creativecommons.org/licenses/by-sa/2.0/uk/ )
+This project released under the 
+[Creative Commons Attribution-Share Alike 2.0 UK: England & Wales](http://creativecommons.org/licenses/by-sa/2.0/uk/)
