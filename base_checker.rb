@@ -12,6 +12,11 @@ class Checker
 		@verbose = false
 	end
 
+	# Return any extra usage parameters added by the checker
+	def usage
+		return nil
+	end
+
 	def parse_params opts
 	end
 

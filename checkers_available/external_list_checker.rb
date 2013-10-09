@@ -11,6 +11,10 @@ class External_List_Checker < Checker
 		@cli_params = [['--ext.file', GetoptLong::REQUIRED_ARGUMENT]]
 	end
 
+	def usage
+		return "\t--ext.file <filename>: external file"
+	end
+
 	def parse_params opts
 		opts.each do |opt, arg|
 			case opt
