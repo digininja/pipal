@@ -9,7 +9,6 @@
 #	--help, -h: show help
 #	--top, -t X: show the top X results (default 10)
 #	--output, -o <filename>: output to file
-#	--external, -e <filename>: external file to compare words against
 #	--gkey <Google Maps API key>: to allow zip code lookups (optional)
 #
 #	FILENAME: The file to count
@@ -71,13 +70,25 @@ def usage
 	puts"pipal #{VERSION} Robin Wood (robin@digininja.org) (www.digininja.org)
 
 Usage: pipal [OPTION] ... FILENAME
-	--help, -h: show help
+	--help, -h, -?: show help
 	--top, -t X: show the top X results (default 10)
 	--output, -o <filename>: output to file
-	--external, -e <filename>: external file to compare words against
 	--gkey <Google Maps API key>: to allow zip code lookups (optional)
 	--list-checkers: Show the available checkers and which are enabled
 	--verbose, -v: Verbose
+"
+
+@checkers.each do |class_name|
+	mod = Object::const_get(class_name).new
+	
+	# Check if each Checker has any usage to add and if so add it
+	use = mod.usage
+	if !use.nil?
+		puts use
+	end
+end
+
+puts "
 
 	FILENAME: The file to count
 
@@ -180,10 +191,9 @@ end
 modules = []
 
 opts = PipalGetoptLong.new(
-	[ '--help', '-h', GetoptLong::NO_ARGUMENT ],
+	[ '--help', '-h', "-?", GetoptLong::NO_ARGUMENT ],
 	[ '--top', "-t" , GetoptLong::REQUIRED_ARGUMENT ],
 	[ '--output', "-o" , GetoptLong::REQUIRED_ARGUMENT ],
-	[ '--external', "-e" , GetoptLong::REQUIRED_ARGUMENT ],
 	[ '--gkey', GetoptLong::REQUIRED_ARGUMENT ],
 	[ "--verbose", "-v" , GetoptLong::NO_ARGUMENT ],
 	[ "--list-checkers" , GetoptLong::NO_ARGUMENT ],
@@ -229,20 +239,6 @@ begin
 				end
 			when "--gkey"
 				google_maps_api_key = arg
-			when "--external"
-				if File.exist?(arg)
-					begin
-						File.open(arg, 'r').each_line do |word|
-							external_list[word.force_encoding("ASCII-8BIT").strip] = 0 unless word.force_encoding("ASCII-8BIT").strip == ''
-						end
-					rescue Errno::EACCES => e
-						puts_msg_with_header("Unable to open external file")
-						exit 1
-					end
-				else
-					puts_msg_with_header("Unable to find external file")
-					exit 1
-				end
 			when "--output"
 				begin
 					output_file = File.new(arg, "w")
