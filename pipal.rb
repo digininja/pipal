@@ -115,7 +115,7 @@ def list_checkers
 		# on a symlink so this finds the ultimate target
 		# of the link (i.e. will travel multiple links)
 		# and require that instead
-		require Pathname.new(fn).realpath
+		require Pathname.new(name).realpath
 	end
 
 	@checkers.each do |class_name|
