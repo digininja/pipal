@@ -1,4 +1,4 @@
-register_checker("Date_Checker")
+register_checker("NL_Date_Checker")
 
 class Date_Checker < Checker
 
