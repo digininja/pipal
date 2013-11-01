@@ -1,6 +1,6 @@
 register_checker("NL_Date_Checker")
 
-class Date_Checker < Checker
+class NL_Date_Checker < Checker
 
 	def initialize
 		super
@@ -52,9 +52,9 @@ class Date_Checker < Checker
 	end
 
 	def get_results()
-		ret_str = "Dates\n"
+		ret_str = "Dutch Dates\n"
 
-		ret_str << "\nMonths\n"
+		ret_str << "\nDutch Months\n"
 		disp = false
 		@months.each_pair do |month, count|
 			unless count == 0
@@ -66,7 +66,7 @@ class Date_Checker < Checker
 			ret_str = "None found\n"
 		end
 
-		ret_str << "\nDays\n"
+		ret_str << "\nDutch Days\n"
 		disp = false
 		@days.each_pair do |day, count|
 			unless count == 0
@@ -78,7 +78,7 @@ class Date_Checker < Checker
 			ret_str << "None found\n"
 		end
 
-		ret_str << "\nMonths (Abreviated)\n"
+		ret_str << "\nDutch Months (Abreviated)\n"
 		disp = false
 		@months_ab.each_pair do |month, count|
 			unless count == 0
@@ -90,7 +90,7 @@ class Date_Checker < Checker
 			ret_str << "None found\n"
 		end
 
-		ret_str << "\nDays (Abreviated)\n"
+		ret_str << "\nDutch Days (Abreviated)\n"
 		disp = false
 		@days_ab.each_pair do |day, count|
 			unless count == 0

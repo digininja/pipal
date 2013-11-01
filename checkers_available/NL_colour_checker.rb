@@ -2,7 +2,7 @@ require_relative "../list_checker.rb"
 
 register_checker("NL_Colour_Checker")
 
-class Colour_Checker < List_Checker
+class NL_Colour_Checker < List_Checker
 	def initialize
 		super
 		@description = "List of common dutch colours"
@@ -10,6 +10,6 @@ class Colour_Checker < List_Checker
 	end
 
 	def get_results()
-		return super("Colours")
+		return super("Dutch Colours")
 	end
 end
