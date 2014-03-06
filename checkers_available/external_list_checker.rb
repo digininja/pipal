@@ -25,7 +25,7 @@ class External_List_Checker < Checker
 		end
 
 		if @file_name.nil?
-			puts "External File Checker - No file specified, aborting"
+			puts "External File Checker - No file specified, use --ext.file to specify the file to use. Aborting"
 			exit 1
 #			raise Exception.new(true), "External File Checker - No file specified"
 		end

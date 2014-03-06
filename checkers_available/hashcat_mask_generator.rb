@@ -1,11 +1,26 @@
 register_checker("Hashcat_Mask_Generator")
 
 class Hashcat_Mask_Generator < Checker
+	@override_cap = false
 
 	def initialize
 		super
 		@description = "Hashcat mask generator"
 		@hashcat_masks = {}
+		@cli_params = [['--hashcat.all', GetoptLong::NO_ARGUMENT]]
+	end
+
+	def usage
+		return "\t--hashcat.all: return Hashcat masks for all passwords\n\t\t\tThis overrides --top"
+	end
+
+	def parse_params opts
+		opts.each do |opt, arg|
+			case opt
+				when '--hashcat.all'
+					@override_cap = true
+			end
+		end
 	end
 
 	def process_word (word, extras = nil)
@@ -34,7 +49,12 @@ class Hashcat_Mask_Generator < Checker
 	end
 
 	def get_results()
-		ret_str = "Hashcat masks (Top #{@cap_at.to_s})\n\n"
+		if @override_cap
+			@cap_at = @hashcat_masks.length
+			ret_str = "Hashcat masks\n\n"
+		else
+			ret_str = "Hashcat masks (Top #{@cap_at.to_s})\n\n"
+		end
 
 		count_ordered = []
 		@hashcat_masks.each_pair do |name, data|
