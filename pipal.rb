@@ -25,13 +25,14 @@ require'uri'
 require'json'
 require "pathname"
 
-VERSION = "3.0 alpha"
+VERSION = "3.1"
 
 # Find out what our base path is
 base_path = File.expand_path(File.dirname(__FILE__))
 require File.join(base_path, 'base_checker.rb')
 require File.join(base_path, 'progressbar.rb')
 require File.join(base_path, 'pipal_getoptlong.rb')
+require File.join(base_path, 'os.rb')
 
 if RUBY_VERSION =~ /1\.8/
 	puts "Sorry, Pipal only works correctly on Ruby >= 1.9.x."
@@ -291,7 +292,7 @@ end
 puts "Generating stats, hit CTRL-C to finish early and dump stats on words already processed."
 puts "Please wait..."
 
-if %x{wc -l '#{filename}'}.match(/\s*([0-9]+).*/)
+if (not OS.windows?) and %x{wc -l '#{filename}'}.match(/\s*([0-9]+).*/)
 	file_line_count = $1.to_i
 else
 	filesize = File.stat(filename).size
