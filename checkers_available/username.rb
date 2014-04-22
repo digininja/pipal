@@ -45,7 +45,9 @@ class Username_Checker < Checker
 			username = extras['username']
 
 			if word == username
-				@exact_matches << word
+				if not @exact_matches.include? word
+					@exact_matches << word
+				end
 			else
 				dist = Levenshtein.distance(word, username)
 				puts "Lev distance #{dist}#" if @verbose
@@ -64,7 +66,7 @@ class Username_Checker < Checker
 
 		ret_str << "Exact Matches\n"
 		if @exact_matches.count > 0
-			@exact_matches.each do |match|
+			@exact_matches.sort.each do |match|
 				ret_str << "#{match}\n"
 			end
 		else
