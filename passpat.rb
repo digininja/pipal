@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 #
-# Author:: Robin Wood (robin@digininja.org)
+# Author:: Robin Wood (robin@digi.ninja)
 # Copyright:: Copyright (c) Robin Wood 2013
 # Licence:: Creative Commons Attribution-Share Alike 2.0
 #
@@ -10,7 +10,7 @@
 require 'getoptlong'
 
 def usage
-	puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+	puts"passpat 1.0 Robin Wood (robin@digi.ninja) (http://digi.ninja)
 
 Usage: passpat.rb [OPTIONS] ... PASSWORD_FILE
     --layout x, -l x: use the layout file specified. No default is set so this
@@ -38,7 +38,7 @@ This project is sponsored by the BruCON 5x5 scheme.
 end
 
 def list_layouts
-	puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)"
+	puts"passpat 1.0 Robin Wood (robin@digi.ninja) (http://digi.ninja)"
 	puts
 	puts "Available layouts:"
 	puts
@@ -85,7 +85,7 @@ begin
 				if File.exist?(script_directory + "/layouts/" + arg + ".rb")
 					require_relative "layouts/" + arg + ".rb"
 				else
-					puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+					puts"passpat 1.0 Robin Wood (robin@digi.ninja) (http://digi.ninja)
 
 Layout file not found
 
@@ -99,7 +99,7 @@ rescue GetoptLong::InvalidOption => e
 	usage
 	exit
 rescue => e
-	puts "Something went wrong, please report it to robin@digininja.org along with these messages:"
+	puts "Something went wrong, please report it to robin@digi.ninja along with these messages:"
 	puts
 	puts e.message
 	puts
@@ -113,7 +113,7 @@ rescue => e
 end
 
 if $layout.nil?
-	puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+	puts"passpat 1.0 Robin Wood (robin@digi.ninja) (http://digi.ninja)
 
 No layout file specified
 
@@ -129,7 +129,7 @@ if verbose
 end
 
 if ARGV.count < 1
-	puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+	puts"passpat 1.0 Robin Wood (robin@digi.ninja) (http://digi.ninja)
 
 No password file specified
 
@@ -140,7 +140,7 @@ end
 filename = ARGV.shift
 
 if filename.nil? or !File.exist? filename
-	puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+	puts"passpat 1.0 Robin Wood (robin@digi.ninja) (http://digi.ninja)
 
 Can't find the password file
 
@@ -237,7 +237,7 @@ catch :ctrl_c do
 			rescue ArgumentError => e
 				puts "Encoding problem processing word: " + line
 			rescue => e
-				puts "Something went wrong, please report it to robin@digininja.org along with these messages:"
+				puts "Something went wrong, please report it to robin@digi.ninja along with these messages:"
 				puts
 				puts e.message
 				puts
@@ -257,14 +257,14 @@ catch :ctrl_c do
 		puts "Total length zeros found: #{total_zeros.to_s}"
 		puts "Total length ones found: #{total_ones.to_s}"
 	rescue Errno::EACCES => e
-		puts"passpat 1.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+		puts"passpat 1.0 Robin Wood (robin@digi.ninja) (http://digi.ninja)
 
 Unable to open the password file
 
 "
 		exit 1
 	rescue => e
-		puts "Something went wrong, please report it to robin@digininja.org along with these messages:"
+		puts "Something went wrong, please report it to robin@digi.ninja along with these messages:"
 		puts
 		puts e.message
 		puts

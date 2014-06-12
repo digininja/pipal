@@ -1,7 +1,7 @@
 Pipal, Password Analyser
 ========================
 
-Copyright(c) 2012, Robin Wood <robin@digininja.org>
+Copyright(c) 2012, Robin Wood <robin@digi.ninja>
 
 On most internal pen-tests I do, I generally manage to get a password dump from
 the DC. To do some basic analysis on this I wrote Counter and since I originally
@@ -25,7 +25,7 @@ Seeing as there have been so many changes to the underlying code I also decided
 to change the name (see below) and do a full new release.
 
 So, what does this new version do? The best way to describe it is to see some
-examples so go to the [Pipal project page](www.digininja.org/projects/pipal.php)
+examples so go to the [Pipal project page](http://digi.ninja/projects/pipal.php)
 for a full walk through of a sample analysis.
 
 Install / Usage
@@ -41,7 +41,7 @@ Usage is fairly simple, -? will give you full instructions:
 
 ```ruby
 $ ./pipal.rb -?
-pipal 2.0 Robin Wood (robin@digininja.org) (www.digininja.org)
+pipal 2.0 Robin Wood (robin@digi.ninja) (http://digi.ninja)
 
 Usage: pipal [OPTION] ... FILENAME
         --help, -h: show help

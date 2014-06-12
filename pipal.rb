@@ -13,7 +13,7 @@
 #
 #	FILENAME: The file to count
 #
-# Author:: Robin Wood (robin@digininja.org)
+# Author:: Robin Wood (robin@digi.ninja)
 # Copyright:: Copyright (c) Robin Wood 2013
 # Licence:: Creative Commons Attribution-Share Alike 2.0
 # Speedbumped by Stefan Venken (stefan.venken@gmail.com)
@@ -61,14 +61,14 @@ class String
 end
 
 def puts_msg_with_header (msg)
-	puts"pipal #{VERSION} Robin Wood (robin@digininja.org) (www.digininja.org)\n"
+	puts"pipal #{VERSION} Robin Wood (robin@digi.ninja) (http://digi.ninja)\n"
 	puts msg
 	puts "\n"
 end
 
 # Display the usage
 def usage
-	puts"pipal #{VERSION} Robin Wood (robin@digininja.org) (www.digininja.org)
+	puts"pipal #{VERSION} Robin Wood (robin@digi.ninja) (http://digi.ninja)
 
 Usage: pipal [OPTION] ... FILENAME
 	--help, -h, -?: show help
@@ -140,7 +140,7 @@ def list_checkers
 		all_checkers[class_name] = {'description' => mod.description, 'enabled' => false}
 	end
 
-	puts "pipal #{VERSION} Robin Wood (robin@digininja.org) (www.digininja.org)"
+	puts "pipal #{VERSION} Robin Wood (robin@digi.ninja) (http://digi.ninja)"
 	puts
 	puts "You have the following Checkers on your system"
 	puts "=============================================="
@@ -264,7 +264,7 @@ rescue GetoptLong::InvalidOption => e
 	usage
 	exit
 rescue => e
-	puts "Something went wrong, please report it to robin@digininja.org along with these messages:"
+	puts "Something went wrong, please report it to robin@digi.ninja along with these messages:"
 	puts
 	puts e.message
 	puts
@@ -345,7 +345,7 @@ catch :ctrl_c do
 			#	exit
 				pbar.inc
 			rescue => e
-				puts "Something went wrong, please report it to robin@digininja.org along with these messages:"
+				puts "Something went wrong, please report it to robin@digi.ninja along with these messages:"
 				puts
 				puts e.message
 				puts
@@ -361,7 +361,7 @@ catch :ctrl_c do
 		puts_msg_with_header("Unable to open the password file")
 		exit 1
 	rescue => e
-		puts "Something went wrong, please report it to robin@digininja.org along with these messages:"
+		puts "Something went wrong, please report it to robin@digi.ninja along with these messages:"
 		puts
 		puts e.message
 		puts
