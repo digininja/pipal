@@ -235,7 +235,7 @@ class Basic_Checker < Checker
 		horiz.generate
 		ret_str << horiz.graph
 
-		ret_str << "\nOne to six characters = #{@one_to_six_chars.to_s} (#{((@ne_to_six_chars.to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
+		ret_str << "\nOne to six characters = #{@one_to_six_chars.to_s} (#{((@one_to_six_chars.to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
 		ret_str << "One to eight characters = #{@one_to_eight_chars.to_s} (#{((@one_to_eight_chars.to_f/@total_words_processed) * 100).round(2).to_s}'%)\n"
 		ret_str << "More than eight characters = #{@over_eight_chars.to_s} (#{((@over_eight_chars.to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
 
