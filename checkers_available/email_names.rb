@@ -21,7 +21,7 @@ class Email_Checker < Checker
 		@lev_total_email = 0
 		@lev_tolerance = 3
 
-		@description = "Compare email addresses to passwords. Checks both name and full address"
+		@description = "Compare email addresses to passwords. Checks both name and full address."
 		@cli_params = [['--email.lev_tolerance', GetoptLong::REQUIRED_ARGUMENT]]
 	end
 
@@ -112,6 +112,7 @@ class Email_Checker < Checker
 		ret_str << "-------------\n"
 		ret_str << "Whole Email Address\n"
 		if @exact_matches_email.count > 0
+			ret_str << "Total: #{@exact_matches_email.count.to_s}\n\n"
 			@exact_matches_email.sort{|a,b| (a['name'] <=> b['name'])}.each do |match|
 				ret_str << "#{match['email']}\n"
 			end
@@ -122,6 +123,7 @@ class Email_Checker < Checker
 
 		ret_str << "Just Name\n"
 		if @exact_matches_name.count > 0
+			ret_str << "Total: #{@exact_matches_name.count.to_s}\n\n"
 
 			@exact_matches_name.sort{|a,b| (a['name'] <=> b['name'])}.each do |match|
 				ret_str << "#{match['name']} from #{match['email']}\n"
@@ -143,6 +145,7 @@ class Email_Checker < Checker
 		ret_str << "Whole Email Address\n"
 		# Need to sort this then have it obey the cap_at value
 		if @lev_matches_email.count > 0
+			ret_str << "Total: #{@lev_matches_email.count.to_s}\n\n"
 			@lev_matches_email.sort{|a,b| (a['distance'] <=> b['distance'])}[0, @cap_at].each do |user_pass|
 				ret_str << "D: #{user_pass['distance']} U: #{user_pass['value']} P: #{user_pass['password']}\n"
 			end
@@ -153,6 +156,7 @@ class Email_Checker < Checker
 		ret_str << "\nJust Name\n"
 		# Need to sort this then have it obey the cap_at value
 		if @lev_matches_name.count > 0
+			ret_str << "Total: #{@lev_matches_name.count.to_s}\n\n"
 			@lev_matches_name.sort{|a,b| (a['distance'] <=> b['distance'])}[0, @cap_at].each do |user_pass|
 				ret_str << "D: #{user_pass['distance']} U: #{user_pass['value']} (#{user_pass['email']}) P: #{user_pass['password']}\n"
 			end
