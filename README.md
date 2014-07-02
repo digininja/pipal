@@ -1,7 +1,7 @@
 Pipal, Password Analyser
 ========================
 
-Copyright(c) 2012, Robin Wood <robin@digi.ninja>
+Copyright(c) 2014, Robin Wood <robin@digi.ninja>
 
 On most internal pen-tests I do, I generally manage to get a password dump from
 the DC. To do some basic analysis on this I wrote Counter and since I originally
