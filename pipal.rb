@@ -159,6 +159,7 @@ verbose = false
 cap_at = 10
 output_file = STDOUT
 custom_word_splitter = nil
+allow_blanks = false
 
 # If there is a customer Splitter sylinked in then require it in
 # and it will automatically be used
@@ -198,6 +199,7 @@ opts = PipalGetoptLong.new(
 	[ '--gkey', GetoptLong::REQUIRED_ARGUMENT ],
 	[ "--verbose", "-v" , GetoptLong::NO_ARGUMENT ],
 	[ "--list-checkers" , GetoptLong::NO_ARGUMENT ],
+	[ "--allow-blanks" , GetoptLong::NO_ARGUMENT ],
 )
 
 @checkers.each do |class_name|
@@ -227,6 +229,8 @@ begin
 			when "--list-checkers"
 				list_checkers
 				exit
+			when "--allow-blanks"
+				allow_blanks = true
 			when "--top"
 				if arg.is_numeric?
 					cap_at = arg.to_i
@@ -308,8 +312,12 @@ catch :ctrl_c do
 			begin
 				line.strip!
 				if line == ""
-					pbar.inc
-					next
+					if allow_blanks
+						line = "<BLANK>"
+					else
+						pbar.inc
+						next
+					end
 				end
 				# single threaded
 				modules.each do |mod|
