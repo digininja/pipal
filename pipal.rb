@@ -76,6 +76,7 @@ Usage: pipal [OPTION] ... FILENAME
 	--output, -o <filename>: output to file
 	--gkey <Google Maps API key>: to allow zip code lookups (optional)
 	--list-checkers: Show the available checkers and which are enabled
+	--allow-blanks: Accept blank lines - doesn't work with some checkers
 	--verbose, -v: Verbose
 "
 
