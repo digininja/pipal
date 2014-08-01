@@ -17,14 +17,20 @@ class Username_Checker < Checker
 		@lev_matches_name = []
 		@lev_total_name = 0
 		@lev_tolerance = 3
+		@ignore_cap = false
 
 		@description = "Compare usernames to passwords."
-		@cli_params = [['--username.lev_tolerance', GetoptLong::REQUIRED_ARGUMENT]]
+		@cli_params = [
+						['--username.lev_tolerance', GetoptLong::REQUIRED_ARGUMENT],
+						['--username.ignore_cap', GetoptLong::NO_ARGUMENT]
+					]
 	end
 
 	def parse_params opts
 		opts.each do |opt, arg|
 			case opt
+				when '--username.ignore_cap'
+					@ignore_cap = true
 				when '--username.lev_tolerance'
 				if arg =~ /^[0-9]*$/
 					@lev_tolerance = arg.to_i
@@ -86,7 +92,11 @@ class Username_Checker < Checker
 		if @exact_matches_name.count > 0
 			ret_str << "Total: #{@exact_matches_name.count.to_s} Unique\n\n"
 
-			@exact_matches_name.sort{|a,b| (a['name'] <=> b['name'])}.each do |match|
+			# Need to sort this then have it obey the cap_at value (if not ignored)
+			if @ignore_cap
+				@cap_at = @exact_matches_name.count
+			end
+			@exact_matches_name.sort{|a,b| (a['name'] <=> b['name'])}[0, @cap_at].each do |match|
 				ret_str << "#{match['name']}\n"
 			end
 		else
@@ -101,7 +111,9 @@ class Username_Checker < Checker
 		ret_str << "\nClose Matches\n"
 		ret_str << "-------------\n"
 
-		# Need to sort this then have it obey the cap_at value
+		if @ignore_cap
+			@cap_at = @lev_matches_name.count
+		end
 		if @lev_matches_name.count > 0
 			ret_str << "Total: #{@lev_matches_name.count.to_s} Unique\n\n"
 			@lev_matches_name.sort{|a,b| (a['distance'] <=> b['distance'])}[0, @cap_at].each do |user_pass|
