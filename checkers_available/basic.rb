@@ -13,6 +13,8 @@ class Basic_Checker < Checker
 	DOUBLES_ON_END_RE = /[^0-9]+([0-9]{2})$/
 	TRIPLES_ON_END_RE =/[^0-9]+([0-9]{3})$/ 
 
+	BLANK_STANDIN = "<BLANK_BLANK_BLANK>"
+
 	def initialize
 		super
 
@@ -91,9 +93,17 @@ class Basic_Checker < Checker
 		# line.force_encoding("ASCII-8BIT")
 
 		if !@words.has_key?(word)
-			@words[word] = 0
+			if word == ""
+				@words[BLANK_STANDIN] = 0
+			else
+				@words[word] = 0
+			end
 		end
-		@words[word] += 1
+		if word == ""
+			@words[BLANK_STANDIN] += 1
+		else
+			@words[word] += 1
+		end
 
 		lower_word = word.downcase
 		# strip any non-alpha from the start or end, I was going to strip all non-alpha
@@ -198,12 +208,23 @@ class Basic_Checker < Checker
 		# The default is to sort lowest to highest, the -1 just inverts that
 		@words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, @cap_at].each { |elem|
 			percentage = (elem[1].to_f / @total_words_processed) * 100
-			ret_str << "#{elem[0]} = #{elem[1].to_s} (#{percentage.round(2).to_s}%)\n"
+			if elem[0] == BLANK_STANDIN
+				word = "<BLANK>"
+			else
+				word = elem[0]
+			end
+			ret_str << "#{word} = #{elem[1].to_s} (#{percentage.round(2).to_s}%)\n"
 		}
 
 		ret_str << "\nTop #{@cap_at.to_s} base words\n"
 		@base_words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, @cap_at].each { |elem|
 			percentage = (elem[1].to_f / @total_words_processed) * 100
+			# check this, blank can't be a base word
+			if elem[0] == BLANK_STANDIN
+				word = "<BLANK>"
+			else
+				word = elem[0]
+			end
 			ret_str << "#{elem[0]} = #{elem[1].to_s} (#{percentage.round(2).to_s}%)\n"
 		}
 
@@ -235,7 +256,8 @@ class Basic_Checker < Checker
 		horiz.generate
 		ret_str << horiz.graph
 
-		ret_str << "\nOne to six characters = #{@one_to_six_chars.to_s} (#{((@one_to_six_chars.to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
+		ret_str << "\nBlank password = #{@lengths[0].to_s} (#{((@lengths[0].to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
+		ret_str << "One to six characters = #{@one_to_six_chars.to_s} (#{((@one_to_six_chars.to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
 		ret_str << "One to eight characters = #{@one_to_eight_chars.to_s} (#{((@one_to_eight_chars.to_f/@total_words_processed) * 100).round(2).to_s}'%)\n"
 		ret_str << "More than eight characters = #{@over_eight_chars.to_s} (#{((@over_eight_chars.to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
 

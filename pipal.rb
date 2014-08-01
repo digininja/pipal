@@ -313,9 +313,7 @@ catch :ctrl_c do
 			begin
 				line.strip!
 				if line == ""
-					if allow_blanks
-						line = "<BLANK>"
-					else
+					unless allow_blanks
 						pbar.inc
 						next
 					end
