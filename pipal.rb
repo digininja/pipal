@@ -311,7 +311,7 @@ catch :ctrl_c do
 					pbar.inc
 					next
 				end
-				# single threaded
+				
 				modules.each do |mod|
 					if !custom_word_splitter.nil?
 						word, extras = Custom_word_splitter::split(line)
@@ -326,16 +326,6 @@ catch :ctrl_c do
 						mod.process_word(word, extras)
 					end
 				end
-
-		# Multi-threaded. With just 5 modules this makes the script about 25% slower
-		#		threads = []
-		#		modules.each do |mod|
-		#			threads << Thread.new(line) do |my_line|
-		#				mod.process_word(my_line)
-		#			end
-		#		end
-		#		threads.each do | a_thread | a_thread.join end
-
 
 				pbar.inc
 			rescue ArgumentError => e
