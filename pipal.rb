@@ -312,14 +312,14 @@ catch :ctrl_c do
 					next
 				end
 				
-				modules.each do |mod|
-					if !custom_word_splitter.nil?
-						word, extras = Custom_word_splitter::split(line)
-					else
-						word = line
-						extras = {}
-					end
+				if !custom_word_splitter.nil?
+					word, extras = Custom_word_splitter::split(line)
+				else
+					word = line
+					extras = {}
+				end
 
+				modules.each do |mod|
 					# allow the custom splitter to pass back nil
 					# which indicates that the line isn't to be parsed
 					if !word.nil?
