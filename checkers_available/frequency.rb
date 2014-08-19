@@ -48,7 +48,7 @@ class Frequency_Checker < Checker
 			@frequencies[position][a] = 0
 		end
 
-		punct = "!\"$%^&*()-=_+[]{};':@,.<>"
+		punct = "čćžšđČĆŽŠĐ!\"$%^&*()-=_+[]{};':@,.<>"
 		punct.each_char do |a|
 			@frequencies[position][a] = 0
 		end
