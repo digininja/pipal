@@ -58,6 +58,11 @@ class String
 	def is_numeric?
 		Integer self rescue false
 	end
+
+	# Wrap the string to specified length
+	def wrap(width = 80)
+		scan(/\S.{0,#{width-2}}\S(?=\s|$)|\S+/)
+	end
 end
 
 def puts_msg_with_header (msg)
@@ -98,6 +103,7 @@ puts "
 end
 
 def list_checkers
+	enabled_checkers = {}
 	all_checkers = {}
 
 	# Find out what our base path is
@@ -121,7 +127,7 @@ def list_checkers
 
 	@checkers.each do |class_name|
 		mod = Object::const_get(class_name).new
-		all_checkers[class_name] = {'description' => mod.description, 'enabled' => true}
+		enabled_checkers[class_name] = {'description' => mod.description, 'enabled' => true}
 	end
 
 	@checkers = []
@@ -137,7 +143,9 @@ def list_checkers
 
 	@checkers.each do |class_name|
 		mod = Object::const_get(class_name).new
-		all_checkers[class_name] = {'description' => mod.description, 'enabled' => false}
+		if not enabled_checkers.has_key?(class_name) then
+			all_checkers[class_name] = {'description' => mod.description, 'enabled' => false}
+		end
 	end
 
 	puts "pipal #{VERSION} Robin Wood (robin@digi.ninja) (http://digi.ninja)"
@@ -145,8 +153,17 @@ def list_checkers
 	puts "You have the following Checkers on your system"
 	puts "=============================================="
 
+	puts "Enabled"
+	puts "-------"
+	enabled_checkers.sort.each do |check|
+		puts "#{check[0]} - #{check[1]['description']}"
+	end
+	
+	puts
+	puts "Available"
+	puts "---------"
 	all_checkers.sort.each do |check|
-		puts "#{check[0]} - #{check[1]['description']}" + (check[1]['enabled']?" - Enabled":"")
+		puts "#{check[0]} - #{check[1]['description']}"
 	end
 	
 	puts
@@ -276,35 +293,40 @@ rescue => e
 	usage
 	exit 1
 end
+#
+#if ARGV.length != 1
+#	puts_msg_with_header("Please specify the file to analyse")
+#	exit 1
+#end
 
-if ARGV.length != 1
-	puts_msg_with_header("Please specify the file to analyse")
-	exit 1
-end
-
-filename = ARGV.shift
-
-if !File.exist? filename
-	puts_msg_with_header("Can't find the password file")
-	exit 2
-end
+#filename = ARGV.shift
+#
+#if !File.exist? filename
+#	puts_msg_with_header("Can't find the password file")
+#	exit 2
+#end
 
 puts "Generating stats, hit CTRL-C to finish early and dump stats on words already processed."
 puts "Please wait..."
 
-if (not OS.windows?) and %x{wc -l '#{filename}'}.match(/\s*([0-9]+).*/)
-	file_line_count = $1.to_i
-else
-	filesize = File.stat(filename).size
-	file_line_count = (filesize / 8).to_i
-	puts "Can't find wc to calculate the number of lines so guessing as " + file_line_count.to_s + " based on file size"
-end
+#if (not OS.windows?) and %x{wc -l '#{filename}'}.match(/\s*([0-9]+).*/)
+#	file_line_count = $1.to_i
+#else
+#	filesize = File.stat(filename).size
+#	file_line_count = (filesize / 8).to_i
+#	puts "Can't find wc to calculate the number of lines so guessing as " + file_line_count.to_s + " based on file size"
+#end
 
+file_line_count = 22
 pbar = ProgressBar.new("Processing", file_line_count)
+
+file_handle = STDIN
 
 catch :ctrl_c do
 	begin
-		File.open(filename, "r").each_line do |line|
+		threads = []
+		thread_limit = 5
+		file_handle.each_line do |line|
 			begin
 				line.strip!
 				if line == ""
@@ -319,19 +341,31 @@ catch :ctrl_c do
 					extras = {}
 				end
 
-				modules.each do |mod|
-					# allow the custom splitter to pass back nil
-					# which indicates that the line isn't to be parsed
-					if !word.nil?
-						mod.process_word(word, extras)
+				# allow the custom splitter to pass back nil
+				# which indicates that the line isn't to be parsed
+				if !word.nil?
+					modules.each do |mod|
+						until threads.map { |t| t.status }.count("run") < thread_limit do sleep 1 end
+						t = Thread.new do
+							mod.process_word(word, extras)
+						#	puts "thread started"
+						end	
+						t.join
+						threads << t
 					end
 				end
 
+				# make sure this word is finished processing before
+				# moving on otherwise get race conditions on the modules
+				until threads.map { |t| t.status }.count("run") == 0 do sleep 1 end
+
+				# reset this so it doesn't grow huge and fill memory with dead threads
+				threads = []
 				pbar.inc
 			rescue ArgumentError => e
 				puts "Encoding problem processing word: " + line
-			#	puts e.inspect
-			#	puts e.backtrace
+				puts e.inspect
+				puts e.backtrace
 			#	exit
 				pbar.inc
 			rescue => e
@@ -371,6 +405,9 @@ pbar.halt
 puts
 puts
 
+output_file.puts "Pipal copyright Robin Wood - http://digi.ninja"
+output_file.puts "Analysis performed " + Time.now.inspect
+output_file.puts 
 modules.each do |mod|
 	output_file.puts mod.get_results
 	output_file.puts
