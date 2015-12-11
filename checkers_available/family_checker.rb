@@ -31,6 +31,7 @@ class Family_Checker < List_Checker
 		            "nephew" => 0,
 		            "niece" => 0,
 		            "papa" => 0,
+		            "parent" => 0,
 		            "partner" => 0,
 		            "pop" => 0,
 		            "sister" => 0,

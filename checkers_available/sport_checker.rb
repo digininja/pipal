@@ -15,9 +15,11 @@ class Sport_Checker < List_Checker
 		            "ball" => 0,
 		            "bowl" => 0,
 		            "football" => 0,
+		            "marathon" => 0,
 		            "olympic" => 0,
 		            "race" => 0,
 		            "rugby" => 0,
+		            "run" => 0,
 		            "soccer" => 0,
 		            "softbasll" => 0
 		        }
