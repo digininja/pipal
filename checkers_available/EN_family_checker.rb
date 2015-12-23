@@ -7,7 +7,7 @@ register_checker("Family_Checker")
 class Family_Checker < List_Checker
 	def initialize
 		super
-		@description = "List of family terms"
+		@description = "List of English family terms"
 		@list = {
 		            "aunt" => 0,
 		            "babies" => 0,
@@ -20,7 +20,7 @@ class Family_Checker < List_Checker
 		            "father" => 0,
 		            "grandfather" => 0,
 		            "grandm" => 0,
-		            "grandpa" => 0,
+		            "grandp" => 0,
 		            "husband" => 0,
 		            "inlaw" => 0,
 		            "kid" => 0,

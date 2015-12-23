@@ -39,6 +39,7 @@ class Religion_Checker < List_Checker
 		            "priest" => 0,
 		            "prophet" => 0,
 		            "proverb" => 0,
+		            "psalm" => 0,
 		            "rabbi" => 0,
 		            "redeem" => 0,
 		            "redemption" => 0,

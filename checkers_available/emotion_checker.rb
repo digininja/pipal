@@ -20,6 +20,7 @@ class Emotion_Checker < List_Checker
 		            "good" => 0,
 		            "happy" => 0,
 		            "hate" => 0,
+		            "heart" => 0,
 		            "hope" => 0,
 		            "hurt" => 0,
 		            "insane" => 0,

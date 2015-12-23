@@ -15,6 +15,7 @@ class Explicit_Checker < List_Checker
 		            "bitch" => 0,
 		            "bites" => 0,
 		            "blowjob" => 0,
+		            "blows" => 0,
 		            "boob" => 0,
 		            "bugger" => 0,
 		            "butt" => 0,

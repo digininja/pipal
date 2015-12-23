@@ -10,6 +10,7 @@ class Military_Checker < List_Checker
 		@description = "List of military terms"
 		@list = {
 		           	"air force" => 0,
+		            "airborn" => 0,
 		            "airforce" => 0,
 		            "army" => 0,
 		            "attack" => 0,
@@ -34,10 +35,14 @@ class Military_Checker < List_Checker
 		            "navy" => 0,
 		            "pilot" => 0,
 		            "protect" => 0,
+		            "ranger" => 0,
 		            "rocket" => 0,
+		            "seal" => 0,
 		            "seargeant" => 0,
 		            "ship" => 0,
 		            "shoot" => 0,
+		            "sniper" => 0,
+		            "specialforce" => 0,
 		            "sub" => 0,
 		            "tank" => 0,
 		            "warrior" => 0
