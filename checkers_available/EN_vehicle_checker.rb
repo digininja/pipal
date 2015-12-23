@@ -18,6 +18,7 @@ class Vehicle_Checker < List_Checker
 		            "ferrari" => 0,
 		            "ford" => 0,
 		            "honda" => 0,
+		            "jeep" => 0,
 		            "mercedes" => 0,
 		            "porshe" => 0,
 		            "toyota" => 0,
