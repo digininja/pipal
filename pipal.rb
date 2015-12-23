@@ -33,6 +33,7 @@ require File.join(base_path, 'base_checker.rb')
 require File.join(base_path, 'progressbar.rb')
 require File.join(base_path, 'pipal_getoptlong.rb')
 require File.join(base_path, 'os.rb')
+require File.join(base_path, 'unmangle.rb')
 
 if RUBY_VERSION =~ /1\.8/
 	puts "Sorry, Pipal only works correctly on Ruby >= 1.9.x."
@@ -318,12 +319,14 @@ catch :ctrl_c do
 					word = line
 					extras = {}
 				end
+				unmangled = Unmangle.unmangle word
+				puts "unmangled word: #{unmangled}"
 
 				modules.each do |mod|
 					# allow the custom splitter to pass back nil
 					# which indicates that the line isn't to be parsed
 					if !word.nil?
-						mod.process_word(word, extras)
+						mod.process_word(word, extras, unmangled)
 					end
 				end
 
