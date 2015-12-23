@@ -10,6 +10,6 @@ class Colour_Checker < List_Checker
 	end
 
 	def get_results()
-		return super("Colours")
+		return super("Colours\n=======")
 	end
 end

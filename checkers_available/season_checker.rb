@@ -6,10 +6,10 @@ class Season_Checker < List_Checker
 	def initialize
 		super
 		@description = "List of common English seasons"
-		@list = {"summer" => 0, "fall" => 0, "winter" => 0, "spring" => 0}
+		@list = {"summer" => 0, "fall" => 0, "winter" => 0, "spring" => 0, "autumn" => 0}
 	end
 
 	def get_results()
-		return super("Seasons")
+		return super("Seasons\n=======")
 	end
 end
