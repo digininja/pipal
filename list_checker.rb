@@ -6,9 +6,9 @@ class List_Checker < Checker
 	end
 
 	def process_word (word, extras = nil)
-		@list.each_pair do |word, count|
-			if /#{word}/i.match word
-				@list[word] += 1
+		@list.each_pair do |list_word, count|
+			if /#{list_word}/i.match word
+				@list[list_word] += 1
 			end
 		end
 		@total_words_processed += 1
