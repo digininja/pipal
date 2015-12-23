@@ -6,7 +6,7 @@ class Colour_Checker < List_Checker
 	def initialize
 		super
 		@description = "List of common English colours"
-		@list = {"black" => 0, "blue" => 0, "brown" => 0, "gray" => 0, "green" => 0, "orange" => 0, "pink" => 0, "purple" => 0, "red" => 0, "white" => 0, "yellow" => 0, 'violet' => 0, 'indigo' => 0}
+		@list = {"black" => {:count => 0, :context => {}}, "blue" => {:count => 0, :context => {}}, "brown" => {:count => 0, :context => {}}, "gray" => {:count => 0, :context => {}}, "green" => {:count => 0, :context => {}}, "orange" => {:count => 0, :context => {}}, "pink" => {:count => 0, :context => {}}, "purple" => {:count => 0, :context => {}}, "red" => {:count => 0, :context => {}}, "white" => {:count => 0, :context => {}}, "yellow" => {:count => 0, :context => {}}, 'violet' => {:count => 0, :context => {}}, 'indigo' => {:count => 0, :context => {}}}
 	end
 
 	def get_results()
