@@ -7,7 +7,7 @@ register_checker("Explicit_Checker")
 class Explicit_Checker < List_Checker
 	def initialize
 		super
-		@description = "List of explicit terms"
+		@description = "List of English explicit terms"
 		@list = {
 		            "anal" => 0,
 		            "asshole" => 0,
@@ -36,6 +36,9 @@ class Explicit_Checker < List_Checker
 		            "jackass" => 0,
 		            "nigger" => 0,
 		            "penis" => 0,
+		            "porn" => 0,
+		            "pron" => 0,
+		            "pr0n" => 0,
 		            "prick" => 0,
 		            "pussy" => 0,
 		            "queer" => 0,
