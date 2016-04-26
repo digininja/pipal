@@ -5,7 +5,7 @@ register_checker("Road_Checker")
 class Road_Checker < List_Checker
 	def initialize
 		super
-		@description = "List of road terms"
+		@description = "List of English road terms"
 		@list = {
 		            "alley" => 0,
 		            "avenue" => 0,
@@ -20,7 +20,6 @@ class Road_Checker < List_Checker
 		            "place" => 0,
 		            "road" => 0,
 		            "route" => 0,
-		            "rue" => 0,
 		            "square" => 0,
 		            "street" => 0,
 		            "terrace" => 0,
