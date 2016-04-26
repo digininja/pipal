@@ -7,19 +7,22 @@ register_checker("Emotion_Checker")
 class Emotion_Checker < List_Checker
 	def initialize
 		super
-		@description = "List of emotional terms"
+		@description = "List of English emotional terms"
 		@list = {
 		            "angry" => 0,
-		            "awesome" => 0, 
+		            "awesome" => 0,
 		            "bad" => 0,
+		            "beautiful" => 0,
 		            "bored" => 0,
 		            "confuse" => 0,
-		            "crazy" => 0,
+		            "craz" => 0,
 		            "envy" => 0,
 		            "fear" => 0,
 		            "good" => 0,
+		            "great" => 0,
 		            "happy" => 0,
 		            "hate" => 0,
+		            "heart" => 0,
 		            "hope" => 0,
 		            "hurt" => 0,
 		            "insane" => 0,
