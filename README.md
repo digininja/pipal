@@ -6,20 +6,20 @@ Copyright(c) 2014, Robin Wood <robin@digi.ninja>
 On most internal pen-tests I do, I generally manage to get a password dump from
 the DC. To do some basic analysis on this I wrote Counter and since I originally
 released it I've made quite a few mods to it to generate extra stats that are
-useful when doing reports to management. 
+useful when doing reports to management.
 
 Recently a good friend, n00bz, asked on Twitter if anyone had a tool that he
 could use to analyse some passwords he had. I pointed him to Counter and said if
 he had any suggestions for additions to let me know. He did just that and over
 the last month between us we have come up with a load of new features which we
 both think will help anyone with a large dump of cracked passwords to analyse.
-We also got some input from well known password analysts 
-[Matt Weir](http://reusablesec.blogspot.com/) and Martin Bos who I'd like to give 
-a big thanks to. 
+We also got some input from well known password analysts
+[Matt Weir](http://reusablesec.blogspot.com/) and Martin Bos who I'd like to give
+a big thanks to.
 
 I have to point out before going on, all this tool does is to give you the stats
 and the information to help you analyse the passwords. The real work is done by
-you in interpreting the results, I give you the numbers, you tell the story. 
+you in interpreting the results, I give you the numbers, you tell the story.
 
 Seeing as there have been so many changes to the underlying code I also decided
 to change the name (see below) and do a full new release.
@@ -50,7 +50,7 @@ Usage: pipal [OPTION] ... FILENAME
         --external, -e : external file to compare words against
 		--gkey <Google Maps API key>: to allow zip code lookups (optional)
 
-        FILENAME: The file to count 
+        FILENAME: The file to count
 ```
 
 When you run the app you'll get a nice progress bar which gives you a rough idea
@@ -64,7 +64,7 @@ based on the file size and an average line length of 8 bytes so the progress bar
 may not be fully accurate but should still give you an idea.
 
 [The Google Maps API](https://developers.google.com/maps/) key is supposed to be
-used by Google to only allow access to their API to registered users. 
+used by Google to only allow access to their API to registered users.
 I assumed this was true and registered for a key
 but in putting together this release I found that it will take any value and
 still do the look up. This may be a bug at the Google end or deliberate and may
@@ -112,13 +112,13 @@ stats together as a distinct group so that if I wanted to add a new, similar,
 group then it was easy to just copy and paste the group. Now I've got a working
 app and I know roughly what I need in the different group types I've got an idea
 on how to rewrite the main parser to make it much more efficient and hopefully
-multi-threaded which should speed up the processing by a lot for large lists. 
+multi-threaded which should speed up the processing by a lot for large lists.
 
 I could have made these changes before releasing version 1.0 but I figured
 before I do I want to get as much feedback as possible from users about the
 features already implemented and about any new features they would like to see
 so that I can bundle all these together into version 2. So, please get in touch
-if there is a set of stats that you'd like to see included. 
+if there is a set of stats that you'd like to see included.
 
 One other thing I know needs fixing, Pipal doesn't handle certain character
 encodings very well. If anyone knows how to correctly deal with different
@@ -128,5 +128,5 @@ know.
 Licence
 =======
 
-This project released under the 
+This project released under the
 [Creative Commons Attribution-Share Alike 2.0 UK: England & Wales](http://creativecommons.org/licenses/by-sa/2.0/uk/)
