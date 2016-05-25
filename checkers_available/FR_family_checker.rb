@@ -40,7 +40,7 @@ class FR_Family_Checker < List_Checker
 		            "père" => 0,
 		            "sœur" => 0,
 		            "tante" => 0,
-		            "épou" => 0,
+		            "époux" => 0,
 		            "épouse" => 0
 		        }
 	end
