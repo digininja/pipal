@@ -30,7 +30,6 @@ class Special_Checker < Checker
 
 	def get_results()
 		ret_str = "Special Checker\n"
-		ret_str +="===============\n"
 		disp = false
 
 		(@list.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |special_data|
