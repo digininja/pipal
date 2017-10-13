@@ -83,7 +83,7 @@ text files with the path inside. Because pipal rely on symlinks in the
 
 ```
 > cd checkers_enabled
-> rm 01basic.rb
+> del 01basic.rb
 > mklink 01basic.rb "../checkers_available/basic.rb"
 ```
 
