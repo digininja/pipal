@@ -15,7 +15,7 @@ class Emotion_Checker < List_Checker
 		            "beautiful" => 0,
 		            "bored" => 0,
 		            "confuse" => 0,
-		            "craz" => 0,
+		            "crazy" => 0,
 		            "envy" => 0,
 		            "fear" => 0,
 		            "good" => 0,
