@@ -10,6 +10,6 @@ class Season_Checker < List_Checker
 	end
 
 	def get_results()
-		return super("Seasons\n=======")
+		return super("Seasons")
 	end
 end
