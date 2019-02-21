@@ -12,6 +12,6 @@ class DE_Season_Checker < List_Checker
 	end
 
 	def get_results()
-		return super("German Seasons\n=======")
+		return super("German Seasons")
 	end
 end
