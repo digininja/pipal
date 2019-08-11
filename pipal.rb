@@ -160,7 +160,7 @@ cap_at = 10
 output_file = STDOUT
 custom_word_splitter = nil
 
-# If there is a customer Splitter sylinked in then require it in
+# If there is a customer Splitter symlinked in then require it in
 # and it will automatically be used
 
 if File.exists?(File.join(base_path, "custom_splitter.rb"))
@@ -168,7 +168,7 @@ if File.exists?(File.join(base_path, "custom_splitter.rb"))
 	custom_word_splitter = Custom_word_splitter
 end
 
-# Loop thorugh all the Checkers which have been enabled and 
+# Loop through all the Checkers which have been enabled and 
 # require them in
 require_list = []
 Dir.glob(base_path + '/checkers_enabled/*rb').select do |f|
