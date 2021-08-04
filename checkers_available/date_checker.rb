@@ -66,6 +66,28 @@ class Date_Checker < Checker
 			ret_str = "None found\n"
 		end
 
+		count_ordered = []
+		@months.each_pair do |month, count|
+			count_ordered << [month, count] unless count == 0
+		end
+		months_sorted = count_ordered.sort do |x,y|
+			(x[1] <=> y[1]) * -1
+		end
+
+		ret_str << "\nMonths (Frequency ordered)\n"
+		disp = false
+		months_sorted.each do |data|
+			month = data[0]
+			count = data[1]
+			unless count == 0
+				disp = true
+				ret_str << "#{month} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
+			end
+		end
+		unless disp
+			ret_str = "None found\n"
+		end
+
 		ret_str << "\nDays\n"
 		disp = false
 		@days.each_pair do |day, count|
