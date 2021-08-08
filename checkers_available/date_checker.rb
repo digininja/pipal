@@ -51,6 +51,17 @@ class Date_Checker < Checker
 		@total_words_processed += 1
 	end
 
+	def freq_sort(data)
+		count_ordered = []
+		data.each_pair do |val, count|
+			count_ordered << [val, count] unless count == 0
+		end
+		freqs_sorted = count_ordered.sort do |x,y|
+			(x[1] <=> y[1]) * -1
+		end
+        return freqs_sorted
+	end
+
 	def get_results()
 		ret_str = "Dates\n"
 
@@ -63,16 +74,10 @@ class Date_Checker < Checker
 			end
 		end
 		unless disp
-			ret_str = "None found\n"
+			ret_str << "None found\n"
 		end
-
-		count_ordered = []
-		@months.each_pair do |month, count|
-			count_ordered << [month, count] unless count == 0
-		end
-		months_sorted = count_ordered.sort do |x,y|
-			(x[1] <=> y[1]) * -1
-		end
+		
+        months_sorted = freq_sort(@months)
 
 		ret_str << "\nMonths (Frequency ordered)\n"
 		disp = false
@@ -85,12 +90,28 @@ class Date_Checker < Checker
 			end
 		end
 		unless disp
-			ret_str = "None found\n"
+			ret_str << "None found\n"
 		end
 
 		ret_str << "\nDays\n"
 		disp = false
 		@days.each_pair do |day, count|
+			unless count == 0
+				disp = true
+				ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
+			end
+		end
+		unless disp
+			ret_str << "None found\n"
+		end
+
+        days_sorted = freq_sort(@days)
+
+		ret_str << "\nDays (Frequency ordered)\n"
+		disp = false
+		days_sorted.each do |data|
+			day = data[0]
+			count = data[1]
 			unless count == 0
 				disp = true
 				ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
@@ -112,9 +133,41 @@ class Date_Checker < Checker
 			ret_str << "None found\n"
 		end
 
+		months_ab_sorted = freq_sort(@months_ab)
+
+		ret_str << "\nMonths (Abreviated) (Frequency ordered)\n"
+		disp = false
+		months_ab_sorted.each do |data|
+			month = data[0]
+			count = data[1]
+			unless count == 0
+				disp = true
+				ret_str << "#{month} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
+			end
+		end
+		unless disp
+			ret_str << "None found\n"
+		end
+
 		ret_str << "\nDays (Abreviated)\n"
 		disp = false
 		@days_ab.each_pair do |day, count|
+			unless count == 0
+				disp = true
+				ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s} %)\n" unless count == 0
+			end
+		end
+		unless disp
+			ret_str << "None found\n"
+		end
+
+		days_ab_sorted = freq_sort(@days_ab)
+
+		ret_str << "\nDays (Abreviated) (Frequency ordered)\n"
+		disp = false
+		days_ab_sorted.each do |data|
+			day = data[0]
+			count = data[1]
 			unless count == 0
 				disp = true
 				ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s} %)\n" unless count == 0
@@ -136,17 +189,11 @@ class Date_Checker < Checker
 			ret_str << "None found\n"
 		end
 
-		count_ordered = []
-		@years.each_pair do |year, count|
-			count_ordered << [year, count] unless count == 0
-		end
-		@years = count_ordered.sort do |x,y|
-			(x[1] <=> y[1]) * -1
-		end
+		years_freq_sort = freq_sort(@years)
 
 		ret_str << "\nYears (Top #{@cap_at.to_s})\n"
 		disp = false
-		@years[0, @cap_at].each do |data|
+		years_freq_sort[0, @cap_at].each do |data|
 			disp = true
 			ret_str << "#{data[0].to_s} = #{data[1].to_s} (#{((data[1].to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
 		end
