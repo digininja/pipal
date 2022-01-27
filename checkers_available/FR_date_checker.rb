@@ -14,7 +14,7 @@ class FR_Date_Checker < Checker
 
 		@days = {'lundi' => 0, 'mardi' => 0, 'mercredi' => 0, 'jeudi' => 0, 'vendredi' => 0, 'samedi' => 0, 'dimanche' => 0}
 		@months = {"janvier" => 0, "fevrier" => 0, "mars" => 0, "avril" => 0, "mai" => 0, "juin" => 0, 
-		"juillet" => 0, "aout" => 0, "septembre" => 0, "octobre" => 0, "novembre" => 0, "decembre" => 0}
+		"juillet" => 0, "aout" => 0, "septembre" => 0, "octobre" => 0, "novembre" => 0, "decembre" => 0, "février" => 0, "août" => 0, "décembre" => 0}
 
 		@years = {}
 
