@@ -74,6 +74,19 @@ can pass it on the command line every time. If you are going to hope that you
 don't need a valid key then just put X in as the value as without something
 Pipal won't try to perform a look up.
 
+Windows
+-------
+
+Git on Windows does not support symlink. Instead, the symlinks are converted to 
+text files with the path inside. Because pipal rely on symlinks in the 
+`checkers_enabled` directory, you need to recreate the symlinks as follows.
+
+```
+> cd checkers_enabled
+> del 01basic.rb
+> mklink 01basic.rb "../checkers_available/basic.rb"
+```
+
 Version History
 ===============
 

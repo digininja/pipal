@@ -2,5 +2,5 @@
 *
 # Except this file
 !.gitignore
-!README
+!README.md
 !01basic.rb
