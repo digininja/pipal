@@ -1,6 +1,6 @@
 # Pipal Goes Modular
 
-Copyright(c) 2013, Robin Wood <robin@digi.ninja>
+Copyright(c) 2022, Robin Wood <robin@digi.ninja>
 
 This is a short doc to explain how the new modular checker and splitter system
 works. It isn't finished yet so may well still change so I'll try to keep this
