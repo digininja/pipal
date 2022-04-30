@@ -1,132 +1,80 @@
-Pipal, Password Analyser
-========================
+Pipal Goes Modular
+==================
 
-Copyright(c) 2014, Robin Wood <robin@digi.ninja>
+Copyright(c) 2013, Robin Wood <robin@digi.ninja>
 
-On most internal pen-tests I do, I generally manage to get a password dump from
-the DC. To do some basic analysis on this I wrote Counter and since I originally
-released it I've made quite a few mods to it to generate extra stats that are
-useful when doing reports to management.
+This is a short doc to explain how the new modular checker and splitter system
+works. It isn't finished yet so may well still change so I'll try to keep this
+guide up-to-date.
 
-Recently a good friend, n00bz, asked on Twitter if anyone had a tool that he
-could use to analyse some passwords he had. I pointed him to Counter and said if
-he had any suggestions for additions to let me know. He did just that and over
-the last month between us we have come up with a load of new features which we
-both think will help anyone with a large dump of cracked passwords to analyse.
-We also got some input from well known password analysts
-[Matt Weir](http://reusablesec.blogspot.com/) and Martin Bos who I'd like to give
-a big thanks to.
+Please get in touch if you have any questions, suggestions or general comments
+about this new modular approach.
 
-I have to point out before going on, all this tool does is to give you the stats
-and the information to help you analyse the passwords. The real work is done by
-you in interpreting the results, I give you the numbers, you tell the story.
+Checkers
+--------
+Checkers are the most important part of Pipal, they take the passwords and
+perform the analysis on them. Originally they were all built into the main
+script so were hard to maintain and it was even harder to add new ones so I
+broke them out into their own modules called Checkers.
 
-Seeing as there have been so many changes to the underlying code I also decided
-to change the name (see below) and do a full new release.
+They are set up in the same style as Apache handles vhosts in some Linux
+distributions, there is a checkers_available directory and a checkers_enabled
+directory. To enable a checker simply symlink it into the enabled directory and
+it will be used by the system. This will allow users who don't care about, say
+Hashcat masks, to not have to spend processor cycles generating them. On a small
+list this probably won't make much difference but it will on a large one.
 
-So, what does this new version do? The best way to describe it is to see some
-examples so go to the [Pipal project page](http://digi.ninja/projects/pipal.php)
-for a full walk through of a sample analysis.
+To create a symlink you can use the following commands:
 
-Install / Usage
-===============
+# Enable the basic checker
 
-The app will only work with `Ruby 1.9.x`, if you try to run it in any previous
-versions you will get a warning and the app will close.
+cd checkers_enabled
+ln -s ../checkers_available/basic.rb .
 
-Pipal is completely self contained and requires no gems installing so should
-work on any vanilla Ruby install.
+# Enable the basic checker and make sure it is ran first (assuming no 00 files)
 
-Usage is fairly simple, -? will give you full instructions:
+ln -s ../checkers_available/basic.rb 01basic.rb
 
-```ruby
-$ ./pipal.rb -?
-pipal 2.0 Robin Wood (robin@digi.ninja) (http://digi.ninja)
+# Enable all checkers
 
-Usage: pipal [OPTION] ... FILENAME
-        --help, -h: show help
-        --top, -t X: show the top X results (default 10)
-        --output, -o : output to file
-        --external, -e : external file to compare words against
-		--gkey <Google Maps API key>: to allow zip code lookups (optional)
+ln -s ../checkers_available/*rb .
 
-        FILENAME: The file to count
-```
+The other good thing about the way Checkers now work is that it is easy to write
+new ones. To see how simple a Checker can be take a look at the
+windows_complexity_checker.rb file in checkers_available. 25 lines get you a
+checker for default Windows complexity, to change this to cover your own rules
+simply clone the file, update the regex, the name and a few bits of copy and
+then symlink it into place.
 
-When you run the app you'll get a nice progress bar which gives you a rough idea
-of how long the app will take to run. If you want to stop it at any point
-hitting Ctrl-c will stop the parsing and will dump out the stats generated so
-far.
+If you want to check for a list of items then this is even easier, check out
+colour_checker.rb, it is just 15 lines long. Give it a name, the list and a
+description and the rest is taken care of for you.
 
-The progress bar is based on a line count from the file which it gets this using
-the wc command. If it can't find wc it will make a guess at the number of lines
-based on the file size and an average line length of 8 bytes so the progress bar
-may not be fully accurate but should still give you an idea.
+The --list-checkers parameter will show you a list of all Checkers which are
+available along with a brief description. I'd like to extend this so each
+Checker will also contain a more detailed description which can also be
+requested.
 
-[The Google Maps API](https://developers.google.com/maps/) key is supposed to be
-used by Google to only allow access to their API to registered users.
-I assumed this was true and registered for a key
-but in putting together this release I found that it will take any value and
-still do the look up. This may be a bug at the Google end or deliberate and may
-change any any time so I'd suggest grabbing a key just in case. To use it you
-can either edit the script and put the key into the constant on line 35 or you
-can pass it on the command line every time. If you are going to hope that you
-don't need a valid key then just put X in as the value as without something
-Pipal won't try to perform a look up.
+Splitters
+---------
+What about if you want to process a file that doesn't just contain passwords,
+maybe it has usernames in it as well. The default action is to treat each new
+line in the file as a password but with a custom Splitter you can now define
+what is the password and what is extra data. You can then write a custom Checker
+which can understand the extra data and off you go. Any existing Checkers which
+don't care about extra data will just ignore it but your custom one will be able
+to handle it.
 
-Version History
-===============
+As an example of this I've created a Splitter called pipe_pass_user.rb, as it
+sounds, this is a pipe (|) separated file with the password first followed by
+the username. The code again is fairly simple, a class with a static method
+called split, that takes the line from the file and splits it down to the
+password and the username. The password is returned on its own with the username
+going in an associative array. The Checker username.rb is the only one which
+currently understands how to handle the username field in the extras array and
+it will take it and do various comparisons between the username and the
+password.
 
-Version 2 - Two big changes, the first a massive speed increase. This patch was
-submitted by Stefan Venken who said a small mention would be good enough, I want
-to give him a big mention. Running through the LinkedIn lists would have taken
-many many hours on version 1, version 2 went through 3.5 million records in
-about 15 minutes. Thank you.
-
-Second change is the addition of US area and zip code lookups. This little
-feature gives some interesting geographical data when ran across password lists
-originating in the US. The best example I've seen of this is the dump from the
-Military Singles site where some passwords could be obviously seen to be grouped
-around US military bases. People in the UK don't have the same relationship with
-phone numbers so I know this won't work here but if anyone can suggest any other
-areas where this might be useful then I'll look at building in some kind of
-location awareness feature so you can specify the source of the list and get
-results customized to the correct area or just run every area and see if a
-pattern emerges.
-
-A non-code-base change is for version 2 is the move from hosting the code myself
-to github. This is my first github hosted project so I may get things wrong, if
-I do, sorry. A number of people asked how they could submit patches so this
-seems like the best way to do it, lets hope it works out.
-
-Version 1 - Was a proof of concept, written fairly in a fairly verbose way so not
-very optimised. Took off way more than I expected it would and gathered a lot of
-community support.
-
-Feedback/Todo
-=============
-
-If you have a read through the source for Pipal you'll notice that it isn't very
-efficient at the moment. The way I built it was to try to keep each chunk of
-stats together as a distinct group so that if I wanted to add a new, similar,
-group then it was easy to just copy and paste the group. Now I've got a working
-app and I know roughly what I need in the different group types I've got an idea
-on how to rewrite the main parser to make it much more efficient and hopefully
-multi-threaded which should speed up the processing by a lot for large lists.
-
-I could have made these changes before releasing version 1.0 but I figured
-before I do I want to get as much feedback as possible from users about the
-features already implemented and about any new features they would like to see
-so that I can bundle all these together into version 2. So, please get in touch
-if there is a set of stats that you'd like to see included.
-
-One other thing I know needs fixing, Pipal doesn't handle certain character
-encodings very well. If anyone knows how to correctly deal with different
-encoding types, especially with regards to regular expressions, please let me
-know.
-
-Licence
-=======
-
-This project released under the
-[Creative Commons Attribution-Share Alike 2.0 UK: England & Wales](http://creativecommons.org/licenses/by-sa/2.0/uk/)
+Only a single splitter can be used at once. To do this symlink the Splitter you
+want to use to a file called custom_splitter.rb in the main Pipal directory. It
+will then be picked up automatically.
