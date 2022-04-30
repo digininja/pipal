@@ -1,5 +1,4 @@
-Pipal Goes Modular
-==================
+# Pipal Goes Modular
 
 Copyright(c) 2013, Robin Wood <robin@digi.ninja>
 
@@ -10,8 +9,8 @@ guide up-to-date.
 Please get in touch if you have any questions, suggestions or general comments
 about this new modular approach.
 
-Checkers
---------
+## Checkers
+
 Checkers are the most important part of Pipal, they take the passwords and
 perform the analysis on them. Originally they were all built into the main
 script so were hard to maintain and it was even harder to add new ones so I
@@ -26,18 +25,24 @@ list this probably won't make much difference but it will on a large one.
 
 To create a symlink you can use the following commands:
 
-# Enable the basic checker
+## Enable the basic checker
 
+```bash
 cd checkers_enabled
 ln -s ../checkers_available/basic.rb .
+```
 
-# Enable the basic checker and make sure it is ran first (assuming no 00 files)
+## Enable the basic checker and make sure it is ran first (assuming no 00 files)
 
+```bash
 ln -s ../checkers_available/basic.rb 01basic.rb
+```
 
-# Enable all checkers
+## Enable all checkers
 
+```bash
 ln -s ../checkers_available/*rb .
+```
 
 The other good thing about the way Checkers now work is that it is easy to write
 new ones. To see how simple a Checker can be take a look at the
@@ -55,8 +60,8 @@ available along with a brief description. I'd like to extend this so each
 Checker will also contain a more detailed description which can also be
 requested.
 
-Splitters
----------
+## Splitters
+
 What about if you want to process a file that doesn't just contain passwords,
 maybe it has usernames in it as well. The default action is to treat each new
 line in the file as a password but with a custom Splitter you can now define
