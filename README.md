@@ -1,7 +1,6 @@
-Pipal, Password Analyser
-========================
+# Pipal, Password Analyser
 
-Copyright(c) 2014, Robin Wood <robin@digi.ninja>
+Copyright(c) 2022, Robin Wood <robin@digi.ninja>
 
 On most internal pen-tests I do, I generally manage to get a password dump from
 the DC. To do some basic analysis on this I wrote Counter and since I originally
@@ -28,8 +27,7 @@ So, what does this new version do? The best way to describe it is to see some
 examples so go to the [Pipal project page](http://digi.ninja/projects/pipal.php)
 for a full walk through of a sample analysis.
 
-Install / Usage
-===============
+## Install / Usage
 
 The app will only work with `Ruby 1.9.x`, if you try to run it in any previous
 versions you will get a warning and the app will close.
@@ -74,8 +72,7 @@ can pass it on the command line every time. If you are going to hope that you
 don't need a valid key then just put X in as the value as without something
 Pipal won't try to perform a look up.
 
-Version History
-===============
+## Version History
 
 Version 2 - Two big changes, the first a massive speed increase. This patch was
 submitted by Stefan Venken who said a small mention would be good enough, I want
@@ -103,8 +100,7 @@ Version 1 - Was a proof of concept, written fairly in a fairly verbose way so no
 very optimised. Took off way more than I expected it would and gathered a lot of
 community support.
 
-Feedback/Todo
-=============
+## Feedback/Todo
 
 If you have a read through the source for Pipal you'll notice that it isn't very
 efficient at the moment. The way I built it was to try to keep each chunk of
@@ -125,8 +121,7 @@ encodings very well. If anyone knows how to correctly deal with different
 encoding types, especially with regards to regular expressions, please let me
 know.
 
-Licence
-=======
+## Licence
 
 This project released under the
 [Creative Commons Attribution-Share Alike 2.0 UK: England & Wales](http://creativecommons.org/licenses/by-sa/2.0/uk/)
