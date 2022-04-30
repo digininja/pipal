@@ -29,13 +29,13 @@ for a full walk through of a sample analysis.
 
 ## Install / Usage
 
-The app will only work with `Ruby 1.9.x`, if you try to run it in any previous
+The app will only work with `Ruby 1.9.x` and newer, if you try to run it in any previous
 versions you will get a warning and the app will close.
 
 Pipal is completely self contained and requires no gems installing so should
 work on any vanilla Ruby install.
 
-Usage is fairly simple, -? will give you full instructions:
+Usage is fairly simple, `-?` will give you full instructions:
 
 ```ruby
 $ ./pipal.rb -?
@@ -71,6 +71,10 @@ can either edit the script and put the key into the constant on line 35 or you
 can pass it on the command line every time. If you are going to hope that you
 don't need a valid key then just put X in as the value as without something
 Pipal won't try to perform a look up.
+
+## Enabling Checkers
+
+Checkers are the scripts that do the actual work, to understand how these work, see the [README_modular.md](README_modular.md) file.
 
 ## Version History
 
