@@ -326,4 +326,107 @@ class Basic_Checker < Checker
 
 		return ret_str
 	end
+
+	def get_json_results()
+		result = {}
+		result['Total_entries'] = @total_words_processed
+		uniq_words = @words.to_a.uniq
+		result['Total_unique_entries'] = uniq_words.length
+
+		top_ten = {}
+		@words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, @cap_at].each { |elem|
+			percentage = (elem[1].to_f / @total_words_processed) * 100
+			top_ten[elem[0]] = {'count'=>elem[1],'percentage'=>percentage.round(2)}
+		}
+		result["Top #{@cap_at.to_s} passwords"] = top_ten
+
+		top_base = {}
+		# ret_str << "\nTop #{@cap_at.to_s} base words\n"
+		@base_words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, @cap_at].each { |elem|
+			percentage = (elem[1].to_f / @total_words_processed) * 100
+			top_base[elem[0]] = {'count'=>elem[1],'percentage'=>percentage.round(2)}
+		}
+		result["Top_#{@cap_at.to_s}_base_words"] = top_base
+
+		length_json = {}
+		length_ordered = []
+		0.upto(@lengths.count - 1) do |len|
+			if @lengths[len].nil?
+				@lengths[len] = 0
+			end
+			percentage = ((@lengths[len].to_f / @total_words_processed) * 100)
+			length_json[len] = {'count'=>@lengths[len],'percentage'=>percentage.round(2)} if @lengths[len] > 0
+			
+			pair = [len, @lengths[len], percentage]
+			length_ordered << pair
+		end
+		result['Password_length'] = length_json
+
+		result['One_to_six_characters']      = {'count'=>@one_to_six_chars,'percentage'=> ((@one_to_six_chars.to_f/@total_words_processed) * 100).round(2)}
+		result['One_to_eight_characters']    = {'count'=>@one_to_eight_chars,'percentage'=>((@one_to_eight_chars.to_f/@total_words_processed) * 100).round(2)}
+		result['More than eight characters'] = {'count'=>@over_eight_chars,'percentage'=>((@over_eight_chars.to_f/@total_words_processed) * 100).round(2)}
+
+		result['Only_lowercase_alpha'] = {'count'=> @char_stats['loweralpha']['count'],'percentage'=> ((@char_stats['loweralpha']['count'].to_f/@total_words_processed) * 100).round(2)}
+		result['Only_uppercase_alpha'] = {'count'=> @char_stats['upperalpha']['count'] , 'percentage' => ((@char_stats['upperalpha']['count'].to_f/@total_words_processed) * 100).round(2)}
+		result['Only_alpha'] = {'count' => (@char_stats['upperalpha']['count'] + @char_stats['loweralpha']['count']) , 'percentage' => (((@char_stats['upperalpha']['count'] + @char_stats['loweralpha']['count']).to_f/@total_words_processed) * 100).round(2)}
+
+		result['Only_numeric'] = {'count' => @char_stats['numeric']['count'] , 'percentage' => ((@char_stats['numeric']['count'].to_f/@total_words_processed) * 100).round(2)}
+
+		result['First_capital_last_symbol'] = {'count' => @first_cap_last_symbol , 'percentage' => ((@first_cap_last_symbol.to_f/@total_words_processed) * 100).round(2)}
+		result['First_capital_last_number'] = {'count' => @first_cap_last_num , 'percentage' => ((@first_cap_last_num.to_f/@total_words_processed) * 100).round(2)}
+
+		result['Single_digit_on_the_end'] = {'count' => @singles_on_end , 'percentage' => ((@singles_on_end.to_f/@total_words_processed) * 100).round(2)}
+		result['Two_digits_on_the_end'] = {'count' => @doubles_on_end , 'percentage' => ((@doubles_on_end.to_f/@total_words_processed) * 100).round(2)}
+		result['Three_digits_on_the_end'] = {'count' => @triples_on_end , 'percentage' => ((@triples_on_end.to_f/@total_words_processed) * 100).round(2)}
+
+		digit_number = 0
+		@last_on_end.each do |a|
+			c = a.to_a.sort do |x,y|
+				(x[1] <=> y[1]) * -1
+			end
+
+			digit_number += 1
+			if c.count > 0
+				if (digit_number == 1)
+					# ret_str << "Last digit"
+				else
+					# ret_str << "Last " + digit_number.to_s + " digits (Top " + @cap_at.to_s + ")"
+				end
+
+				c[0, @cap_at].each do |d|
+					# ret_str << d[0] + " = " + d[1].to_s + ' (' + ((d[1].to_f/@total_words_processed) * 100).round(2).to_s + "%)"
+				end
+			end
+		end
+
+		count_ordered = []
+		@char_stats.each_pair do |name, data|
+			count_ordered << [name, data] unless data['count'].zero?
+		end
+		@char_stats = count_ordered.sort do |x,y|
+			(x[1]['count'] <=> y[1]['count']) * -1
+		end
+
+		char_sets = {}
+		@char_stats.each do |name, data|
+			char_sets[name] = {'count'=> data['count'], 'percentage' => ((data['count'].to_f/@total_words_processed) * 100).round(2)}
+		end
+		result['Character_sets'] = char_sets
+
+		count_ordered = []
+		@char_sets_ordering.each_pair do |name, data|
+			count_ordered << [name, data] unless data['count'].zero?
+		end
+		@char_sets_ordering = count_ordered.sort do |x,y|
+			(x[1]['count'] <=> y[1]['count']) * -1
+		end
+
+		char_sets_order = {}
+		@char_sets_ordering.each do |name, data|
+			char_sets_order[name] = {'count'=> data['count'], 'percentage' => ((data['count'].to_f/@total_words_processed) * 100).round(2)}
+		end
+		result['Character_set_ordering'] = char_sets_order
+		
+		return result
+	end
 end

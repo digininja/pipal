@@ -44,4 +44,17 @@ class Special_Checker < Checker
 
 		return ret_str
 	end
+
+	def get_json_results()
+		result = {}
+
+		(@list.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |special_data|
+			unless special_data[1].zero?
+				result[special_data[0]] = { '#' => special_data[1], '%' => ((special_data[1].to_f/@total_words_processed) * 100).round(2) }
+			end
+		end
+
+		return result
+	end
+
 end
