@@ -187,14 +187,6 @@ class Basic_Checker < Checker
 		@total_words_processed += 1
 	end
 
-	def print_entries(entries)
-		ret_str = ''
-		entries.each { |k,v|
-			ret_str << "#{k} = #{v['count']} (#{v['percentage']}%)\n"
-		}
-		return ret_str
-	end
-
 	def get_results()
 		data = get_json_results
 		total_words_processed = data['Total_entries']

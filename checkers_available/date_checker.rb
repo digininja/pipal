@@ -63,141 +63,77 @@ class Date_Checker < Checker
 	end
 
 	def get_results()
+		data = get_json_results
+
 		ret_str = "Dates\n"
 
 		ret_str << "\nMonths\n"
-		disp = false
-		@months.each_pair do |month, count|
-			unless count == 0
-				disp = true
-				ret_str << "#{month} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
-			end
-		end
-		unless disp
+		if !data['Months'].nil?
+			ret_str << print_entries(data['Months'])
+		else
 			ret_str << "None found\n"
 		end
-		
-        months_sorted = freq_sort(@months)
 
 		ret_str << "\nMonths (Frequency ordered)\n"
-		disp = false
-		months_sorted.each do |data|
-			month = data[0]
-			count = data[1]
-			unless count == 0
-				disp = true
-				ret_str << "#{month} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
-			end
-		end
-		unless disp
+		if !data['Months'].nil?
+			ret_str << print_entries(data['Months'].sort{|a,b|(b[1]['count'] <=> a[1]['count'])})
+		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nDays\n"
-		disp = false
-		@days.each_pair do |day, count|
-			unless count == 0
-				disp = true
-				ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
-			end
-		end
-		unless disp
+		if !data['Days'].nil?
+			ret_str << print_entries(data['Days'])
+		else
 			ret_str << "None found\n"
 		end
 
-        days_sorted = freq_sort(@days)
-
 		ret_str << "\nDays (Frequency ordered)\n"
-		disp = false
-		days_sorted.each do |data|
-			day = data[0]
-			count = data[1]
-			unless count == 0
-				disp = true
-				ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
-			end
-		end
-		unless disp
+		if !data['Days'].nil?
+			ret_str << print_entries(data['Days'].sort{|a,b|(b[1]['count'] <=> a[1]['count'])})
+		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nMonths (Abreviated)\n"
-		disp = false
-		@months_ab.each_pair do |month, count|
-			unless count == 0
-				disp = true
-				ret_str << "#{month} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
-			end
-		end
-		unless disp
+		if !data['Months_(Abreviated)'].nil?
+			ret_str << print_entries(data['Months_(Abreviated)'])
+		else
 			ret_str << "None found\n"
 		end
 
-		months_ab_sorted = freq_sort(@months_ab)
-
 		ret_str << "\nMonths (Abreviated) (Frequency ordered)\n"
-		disp = false
-		months_ab_sorted.each do |data|
-			month = data[0]
-			count = data[1]
-			unless count == 0
-				disp = true
-				ret_str << "#{month} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
-			end
-		end
-		unless disp
+		if !data['Months_(Abreviated)'].nil?
+			ret_str << print_entries(data['Months_(Abreviated)'].sort{|a,b|(b[1]['count'] <=> a[1]['count'])})
+		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nDays (Abreviated)\n"
-		disp = false
-		@days_ab.each_pair do |day, count|
-			unless count == 0
-				disp = true
-				ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s} %)\n" unless count == 0
-			end
-		end
-		unless disp
+		if !data['Days_(Abreviated)'].nil?
+			ret_str << print_entries(data['Days_(Abreviated)'])
+		else
 			ret_str << "None found\n"
 		end
 
-		days_ab_sorted = freq_sort(@days_ab)
-
 		ret_str << "\nDays (Abreviated) (Frequency ordered)\n"
-		disp = false
-		days_ab_sorted.each do |data|
-			day = data[0]
-			count = data[1]
-			unless count == 0
-				disp = true
-				ret_str << "#{day} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s} %)\n" unless count == 0
-			end
-		end
-		unless disp
+		if !data['Days_(Abreviated)'].nil?
+			ret_str << print_entries(data['Days_(Abreviated)'].sort{|a,b|(b[1]['count'] <=> a[1]['count'])})
+		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nIncludes years\n"
-		disp = false
-		@years.each_pair do |number, count|
-			unless count == 0
-				disp = true
-				ret_str << "#{number.to_s} = #{count.to_s} (#{((count.to_f/@total_words_processed) * 100).round(2).to_s}%)\n" unless count == 0
-			end
-		end
-		unless disp
+		if !data['Years'].nil?
+			ret_str << print_entries(data['Years'])
+		else
 			ret_str << "None found\n"
 		end
 
-		years_freq_sort = freq_sort(@years)
-
 		ret_str << "\nYears (Top #{@cap_at.to_s})\n"
-		disp = false
-		years_freq_sort[0, @cap_at].each do |data|
-			disp = true
-			ret_str << "#{data[0].to_s} = #{data[1].to_s} (#{((data[1].to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
-		end
-		unless disp
+		if !data["Years_(Top #{@cap_at})"].nil?
+			ret_str << print_entries(data["Years_(Top #{@cap_at})"])
+		else
 			ret_str << "None found\n"
 		end
 
@@ -209,32 +145,32 @@ class Date_Checker < Checker
 
 		months = {}
 		@months.each_pair do |month, count|
-			months[month] = { '#' => count, '%' => ((count.to_f/@total_words_processed) * 100).round(2) } unless count.zero?
+			months[month] = { 'count' => count, 'percentage' => ((count.to_f/@total_words_processed) * 100).round(2) } unless count.zero?
 		end
 		result['Months'] = months
 
 		days = {}
 		@days.each_pair do |day, count|
-			days[day] = { '#' => count, '%' => ((count.to_f/@total_words_processed) * 100).round(2) } unless count.zero?
+			days[day] = { 'count' => count, 'percentage' => ((count.to_f/@total_words_processed) * 100).round(2) } unless count.zero?
 		end
 		result['Days'] = days
 
 		months_ab = {}
 		@months_ab.each_pair do |month, count|
-			months_ab[month] = { '#' => count, '%' => ((count.to_f/@total_words_processed) * 100).round(2) } unless count.zero?
+			months_ab[month] = { 'count' => count, 'percentage' => ((count.to_f/@total_words_processed) * 100).round(2) } unless count.zero?
 		end
 		result['Months_(Abreviated)'] = months_ab
 
 		days_ab = {}
 		@days_ab.each_pair do |day, count|
-			days_ab[day] = { '#' => count, '%' => ((count.to_f/@total_words_processed) * 100).round(2) } unless count.zero?
+			days_ab[day] = { 'count' => count, 'percentage' => ((count.to_f/@total_words_processed) * 100).round(2) } unless count.zero?
 		end
 		result['Days_(Abreviated)'] = days_ab
 
 		years = {}
 
 		@years.each_pair do |number, count|
-			years[number] = { '#' => count, '%' => ((count.to_f/@total_words_processed) * 100).round(2) } unless count.zero?
+			years[number] = { 'count' => count, 'percentage' => ((count.to_f/@total_words_processed) * 100).round(2) } unless count.zero?
 		end
 		result['Years'] = years
 
@@ -242,7 +178,7 @@ class Date_Checker < Checker
 
 		years_top_ten = {}
 		years_freq_sort[0, @cap_at].each do |data|
-			years_top_ten[data[0]] = { '#'=>data[1], '%' => ((data[1].to_f/@total_words_processed) * 100).round(2) }
+			years_top_ten[data[0]] = { 'count'=>data[1], 'percentage' => ((data[1].to_f/@total_words_processed) * 100).round(2) }
 		end
 		result["Years_(Top #{@cap_at})"] = years_top_ten
 

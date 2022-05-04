@@ -28,4 +28,13 @@ class Checker
 
 	def get_json_results ()
 	end
+
+	def print_entries(entries)
+		ret_str = ''
+		puts entries
+		entries.each do |k, v|
+			ret_str << "#{k} = #{v['count']} (#{v['percentage']}%)\n"
+		end
+		return ret_str
+	end
 end
