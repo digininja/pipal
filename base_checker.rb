@@ -26,6 +26,6 @@ class Checker
 	def get_results (total_words_processed)
 	end
 
-	def get_json_results (total_words_processed)
+	def get_json_results ()
 	end
 end

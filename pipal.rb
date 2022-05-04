@@ -378,7 +378,9 @@ puts if !as_json
 if as_json
 	result = {}
 	modules.each do |mod|
-		result[mod.description] = mod.get_json_results
+		# check if the module has the export functionality
+		output = mod.get_json_results
+		result[mod.description] = output unless output.nil?
 	end
 	
 	output_file.puts result.to_json
