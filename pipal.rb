@@ -372,8 +372,8 @@ end
 pbar.halt
 
 # This is a screen puts to clear after the status bars in case the data is being written to the screen, do not add outfile to it
-puts
-puts
+puts if !as_json
+puts if !as_json
 
 if as_json
 	result = {}
