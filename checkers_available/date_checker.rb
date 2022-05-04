@@ -68,63 +68,64 @@ class Date_Checker < Checker
 		ret_str = "Dates\n"
 
 		ret_str << "\nMonths\n"
-		if !data['Months'].nil?
+		if !data['Months'].empty?
 			ret_str << print_entries(data['Months'])
 		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nMonths (Frequency ordered)\n"
-		if !data['Months'].nil?
-			ret_str << print_entries(data['Months'].sort{|a,b|(b[1]['count'] <=> a[1]['count'])})
+		if !data['Months'].empty?
+			ret_str << print_entries(data['Months'].sort { |a, b| (b[1]['count'] <=> a[1]['count'])})
 		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nDays\n"
-		if !data['Days'].nil?
+		if !data['Days'].empty?
 			ret_str << print_entries(data['Days'])
 		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nDays (Frequency ordered)\n"
-		if !data['Days'].nil?
-			ret_str << print_entries(data['Days'].sort{|a,b|(b[1]['count'] <=> a[1]['count'])})
+		if !data['Days'].empty?
+			puts data['Days']
+			ret_str << print_entries(data['Days'].sort { |a, b| (b[1]['count'] <=> a[1]['count'])})
 		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nMonths (Abreviated)\n"
-		if !data['Months_(Abreviated)'].nil?
+		if !data['Months_(Abreviated)'].empty?
 			ret_str << print_entries(data['Months_(Abreviated)'])
 		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nMonths (Abreviated) (Frequency ordered)\n"
-		if !data['Months_(Abreviated)'].nil?
+		if !data['Months_(Abreviated)'].empty?
 			ret_str << print_entries(data['Months_(Abreviated)'].sort{|a,b|(b[1]['count'] <=> a[1]['count'])})
 		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nDays (Abreviated)\n"
-		if !data['Days_(Abreviated)'].nil?
+		if !data['Days_(Abreviated)'].empty?
 			ret_str << print_entries(data['Days_(Abreviated)'])
 		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nDays (Abreviated) (Frequency ordered)\n"
-		if !data['Days_(Abreviated)'].nil?
+		if !data['Days_(Abreviated)'].empty?
 			ret_str << print_entries(data['Days_(Abreviated)'].sort{|a,b|(b[1]['count'] <=> a[1]['count'])})
 		else
 			ret_str << "None found\n"
 		end
 
 		ret_str << "\nIncludes years\n"
-		if !data['Years'].nil?
+		if !data['Years'].empty?
 			ret_str << print_entries(data['Years'])
 		else
 			ret_str << "None found\n"

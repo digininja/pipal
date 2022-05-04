@@ -242,7 +242,7 @@ class Basic_Checker < Checker
 			digits << pwd[1]['count']
 		}
 
-		disp = !data['Last_digit'].nil?
+		disp = !data['Last_digit'].empty?
 		if disp
 			ret_str << "\n"
 			horiz = HorizBar.new(digits)
