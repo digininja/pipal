@@ -22,4 +22,12 @@ class Windows_Complexity_Checker < Checker
 		ret_str << "Number of matches = #{@matches} (#{((@matches.to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
 		return ret_str
 	end
+
+	def get_json_results()
+		result = {}
+		
+		result['Number_of_Matches'] = { '#' => @matches, '%' => ((@matches.to_f / @total_words_processed) * 100).round(2) }
+
+		return result
+	end
 end

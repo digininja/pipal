@@ -25,7 +25,7 @@ require'uri'
 require'json'
 require "pathname"
 
-VERSION = "3.1.2"
+VERSION = "3.2.0"
 
 # Find out what our base path is
 base_path = File.expand_path(File.dirname(__FILE__))
@@ -156,6 +156,7 @@ end
 
 # Defaults
 verbose = false
+as_json = false
 cap_at = 10
 output_file = STDOUT
 custom_word_splitter = nil
@@ -198,6 +199,7 @@ opts = PipalGetoptLong.new(
 	[ '--gkey', GetoptLong::REQUIRED_ARGUMENT ],
 	[ "--verbose", "-v" , GetoptLong::NO_ARGUMENT ],
 	[ "--list-checkers" , GetoptLong::NO_ARGUMENT ],
+	[ "--json", GetoptLong::NO_ARGUMENT ],
 )
 
 @checkers.each do |class_name|
@@ -249,6 +251,8 @@ begin
 				end
 			when "--verbose"
 				verbose = true
+			when "--json"
+				as_json = true
 		end
 	end
 
@@ -289,8 +293,8 @@ if !File.exist? filename
 	exit 2
 end
 
-puts "Generating stats, hit CTRL-C to finish early and dump stats on words already processed."
-puts "Please wait..."
+puts "Generating stats, hit CTRL-C to finish early and dump stats on words already processed." if !as_json
+puts "Please wait..." if !as_json
 
 if (not OS.windows?) and %x{wc -l '#{filename}'}.match(/\s*([0-9]+).*/)
 	file_line_count = $1.to_i
@@ -368,15 +372,26 @@ end
 pbar.halt
 
 # This is a screen puts to clear after the status bars in case the data is being written to the screen, do not add outfile to it
-puts
-puts
+puts if !as_json
+puts if !as_json
 
-modules.each do |mod|
-	output_file.puts mod.get_results
-	output_file.puts
+if as_json
+	result = {}
+	modules.each do |mod|
+		# check if the module has the export functionality
+		output = mod.get_json_results
+		result[mod.description] = output unless output.nil?
+	end
+	
+	output_file.puts result.to_json
+else
+	modules.each do |mod|
+		output_file.puts mod.get_results
+		output_file.puts
+	end
 end
 
-output_file.puts
+output_file.puts if !as_json
 
 # Companion to the commented out benchmark at the top
 #end

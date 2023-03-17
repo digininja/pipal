@@ -188,95 +188,141 @@ class Basic_Checker < Checker
 	end
 
 	def get_results()
+		data = get_json_results
+		total_words_processed = data['Total_entries']
 		ret_str = "Basic Results\n\n"
-		ret_str <<  "Total entries = #{@total_words_processed.to_s}\n"
-		uniq_words = @words.to_a.uniq
-		ret_str << "Total unique entries = #{uniq_words.length.to_s}\n"
-		uniq_words = Array.new(@words.to_a.uniq)
+		ret_str <<  "Total entries = #{data['Total_entries']}\n"
+		ret_str << "Total unique entries = #{data['Total_unique_entries']}\n"
 
-		ret_str << "\nTop #{@cap_at.to_s} passwords\n"
-		# The default is to sort lowest to highest, the -1 just inverts that
-		@words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, @cap_at].each { |elem|
-			percentage = (elem[1].to_f / @total_words_processed) * 100
-			ret_str << "#{elem[0]} = #{elem[1].to_s} (#{percentage.round(2).to_s}%)\n"
-		}
+		ret_str << "\nTop #{@cap_at} passwords\n"
+		ret_str << print_entries(data["Top_#{@cap_at.to_s}_passwords"])
 
 		ret_str << "\nTop #{@cap_at.to_s} base words\n"
-		@base_words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, @cap_at].each { |elem|
-			percentage = (elem[1].to_f / @total_words_processed) * 100
-			ret_str << "#{elem[0]} = #{elem[1].to_s} (#{percentage.round(2).to_s}%)\n"
-		}
+		ret_str << print_entries(data["Top_#{@cap_at.to_s}_base_words"])
 
 		ret_str << "\nPassword length (length ordered)\n"
+		ret_str << print_entries(data['Password_length'])
 
+		ret_str << "\nPassword length (count ordered)\n"
+		ret_str << print_entries(data['Password_length'].sort{|a,b|(b[1]['count'] <=> a[1]['count'])})
+
+		ret_str << "\n"
+
+		lengths = []
+		data['Password_length'].each {|pwd|
+			lengths << pwd[1]['count']
+		}
+		horiz = HorizBar.new(lengths)
+		horiz.generate
+		ret_str << horiz.graph
+
+
+		ret_str << "\nOne to six characters = #{data['One_to_six_characters']['count']} (#{data['One_to_six_characters']['percentage']}%)\n"
+		ret_str << "One to eight characters = #{data['One_to_eight_characters']['count']} (#{data['One_to_eight_characters']['percentage']}%)\n"
+		ret_str << "More than eight characters = #{data['More_than_eight_characters']['count']} (#{data['More_than_eight_characters']['percentage']}%)\n"
+
+		ret_str << "\nOnly lowercase alpha = #{data['Only_lowercase_alpha']['count']} (#{data['Only_lowercase_alpha']['percentage']}%)\n"
+		ret_str << "Only uppercase alpha = #{data['Only_uppercase_alpha']['count']} (#{data['Only_uppercase_alpha']['percentage']}%)\n"
+		ret_str << "Only alpha = #{data['Only_alpha']['count']} (#{data['Only_alpha']['percentage']}%)\n"
+
+		ret_str << "Only numeric = #{data['Only_numeric']['count']} (#{data['Only_numeric']['percentage']}%)\n"
+
+		ret_str << "\nFirst capital last symbol = #{data['First_capital_last_symbol']['count']} (#{data['First_capital_last_symbol']['percentage']}%)\n"
+		ret_str << "First capital last number = #{data['First_capital_last_number']['count']} (#{data['First_capital_last_number']['percentage']}%)\n"
+
+		ret_str << "\nSingle digit on the end = #{data['Single_digit_on_the_end']['count']} (#{data['Single_digit_on_the_end']['percentage']}%)\n"
+		ret_str << "Two digits on the end = #{data['Two_digits_on_the_end']['count']} (#{data['Two_digits_on_the_end']['percentage']}%)\n"
+		ret_str << "Three digits on the end = #{data['Three_digits_on_the_end']['count']} (#{data['Three_digits_on_the_end']['percentage']}%)\n"
+
+		ret_str << "\nLast number\n"
+		ret_str << print_entries(data['Last_digit'].sort{|a,b|(a[0] <=> b[0])})
+
+		digits = []
+		data['Last_digit'].sort{|a,b|(a[0] <=> b[0])}.each {|pwd|
+			digits << pwd[1]['count']
+		}
+
+		disp = !data['Last_digit'].empty?
+		if disp
+			ret_str << "\n"
+			horiz = HorizBar.new(digits)
+			horiz.generate
+			ret_str << horiz.graph
+			else
+			ret_str << "None found\n"
+		end
+
+		ret_str << "\nLast digit\n"
+		ret_str << print_entries(data['Last_digit'])
+
+		2.upto(10) do |len|
+			digits = data["Last_#{len}_digits_(Top_#{@cap_at.to_s})"]
+			if !digits.nil?
+				ret_str << "\nLast #{len} digits (Top #{@cap_at.to_s})\n"
+				ret_str << print_entries(digits)
+			end
+		end
+
+		ret_str << "\nCharacter sets\n"
+		ret_str << print_entries(data['Character_sets'])
+
+		ret_str << "\nCharacter set ordering\n"
+		ret_str << print_entries(data['Character_set_ordering'])
+
+		return ret_str
+	end
+
+	def get_json_results()
+		result = {}
+		result['Total_entries'] = @total_words_processed
+		uniq_words = @words.to_a.uniq
+		result['Total_unique_entries'] = uniq_words.length
+
+		top_ten = {}
+		@words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, @cap_at].each { |elem|
+			percentage = (elem[1].to_f / @total_words_processed) * 100
+			top_ten[elem[0]] = {'count'=>elem[1],'percentage'=>percentage.round(2)}
+		}
+		result["Top_#{@cap_at.to_s}_passwords"] = top_ten
+
+		top_base = {}
+		# ret_str << "\nTop #{@cap_at.to_s} base words\n"
+		@base_words.sort{|a,b| (a[1]<=>b[1]) * -1}[0, @cap_at].each { |elem|
+			percentage = (elem[1].to_f / @total_words_processed) * 100
+			top_base[elem[0]] = {'count'=>elem[1],'percentage'=>percentage.round(2)}
+		}
+		result["Top_#{@cap_at.to_s}_base_words"] = top_base
+
+		length_json = {}
 		length_ordered = []
 		0.upto(@lengths.count - 1) do |len|
 			if @lengths[len].nil?
 				@lengths[len] = 0
 			end
 			percentage = ((@lengths[len].to_f / @total_words_processed) * 100)
-			ret_str << "#{len.to_s} = #{@lengths[len].to_s} (#{percentage.round(2).to_s}%)\n" if @lengths[len] > 0
+			length_json[len] = {'count'=>@lengths[len],'percentage'=>percentage.round(2)} if @lengths[len] > 0
 			
 			pair = [len, @lengths[len], percentage]
 			length_ordered << pair
 		end
+		result['Password_length'] = length_json
 
-		length_ordered.sort! do |x,y|
-			y[1] <=> x[1]
-		end
+		result['One_to_six_characters']      = {'count'=>@one_to_six_chars,'percentage'=> ((@one_to_six_chars.to_f/@total_words_processed) * 100).round(2)}
+		result['One_to_eight_characters']    = {'count'=>@one_to_eight_chars,'percentage'=>((@one_to_eight_chars.to_f/@total_words_processed) * 100).round(2)}
+		result['More_than_eight_characters'] = {'count'=>@over_eight_chars,'percentage'=>((@over_eight_chars.to_f/@total_words_processed) * 100).round(2)}
 
-		ret_str << "\nPassword length (count ordered)\n"
-		length_ordered.each do |pair|
-			ret_str << "#{pair[0].to_s} = #{pair[1].to_s} (#{pair[2].round(2).to_s}%)\n" if pair[1] > 0
-		end
-		ret_str << "\n"
+		result['Only_lowercase_alpha'] = {'count'=> @char_stats['loweralpha']['count'],'percentage'=> ((@char_stats['loweralpha']['count'].to_f/@total_words_processed) * 100).round(2)}
+		result['Only_uppercase_alpha'] = {'count'=> @char_stats['upperalpha']['count'] , 'percentage' => ((@char_stats['upperalpha']['count'].to_f/@total_words_processed) * 100).round(2)}
+		result['Only_alpha'] = {'count' => (@char_stats['upperalpha']['count'] + @char_stats['loweralpha']['count']) , 'percentage' => (((@char_stats['upperalpha']['count'] + @char_stats['loweralpha']['count']).to_f/@total_words_processed) * 100).round(2)}
 
-		horiz = HorizBar.new(@lengths)
-		horiz.generate
-		ret_str << horiz.graph
+		result['Only_numeric'] = {'count' => @char_stats['numeric']['count'] , 'percentage' => ((@char_stats['numeric']['count'].to_f/@total_words_processed) * 100).round(2)}
 
-		ret_str << "\nOne to six characters = #{@one_to_six_chars.to_s} (#{((@one_to_six_chars.to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
-		ret_str << "One to eight characters = #{@one_to_eight_chars.to_s} (#{((@one_to_eight_chars.to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
-		ret_str << "More than eight characters = #{@over_eight_chars.to_s} (#{((@over_eight_chars.to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
+		result['First_capital_last_symbol'] = {'count' => @first_cap_last_symbol , 'percentage' => ((@first_cap_last_symbol.to_f/@total_words_processed) * 100).round(2)}
+		result['First_capital_last_number'] = {'count' => @first_cap_last_num , 'percentage' => ((@first_cap_last_num.to_f/@total_words_processed) * 100).round(2)}
 
-		ret_str << "\nOnly lowercase alpha = " + @char_stats['loweralpha']['count'].to_s + ' (' + ((@char_stats['loweralpha']['count'].to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
-		ret_str << "Only uppercase alpha = " + @char_stats['upperalpha']['count'].to_s + ' (' + ((@char_stats['upperalpha']['count'].to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
-		ret_str << "Only alpha = " + (@char_stats['upperalpha']['count'] + @char_stats['loweralpha']['count']).to_s + ' (' + (((@char_stats['upperalpha']['count'] + @char_stats['loweralpha']['count']).to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
-
-		ret_str << "Only numeric = " + @char_stats['numeric']['count'].to_s + ' (' + ((@char_stats['numeric']['count'].to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
-
-		ret_str << "\nFirst capital last symbol = " + @first_cap_last_symbol.to_s + ' (' + ((@first_cap_last_symbol.to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
-		ret_str << "First capital last number = " + @first_cap_last_num.to_s + ' (' + ((@first_cap_last_num.to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
-
-		ret_str << "\nSingle digit on the end = " + @singles_on_end.to_s + ' (' + ((@singles_on_end.to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
-		ret_str << "Two digits on the end = " + @doubles_on_end.to_s + ' (' + ((@doubles_on_end.to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
-		ret_str << "Three digits on the end = " + @triples_on_end.to_s + ' (' + ((@triples_on_end.to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
-
-		ret_str << "\nLast number\n"
-		disp = false
-
-		graph_numbers = {0=>0, 1=>0, 2=>0, 3=>0, 4=>0, 5=>0, 6=>0, 7=>0, 8=>0, 9=>0}
-
-		c = @last_on_end[0].to_a.sort do |x,y|
-			(x[0] <=> y[0])
-		end
-
-		c.each do |number, count|
-			unless count == 0
-				disp = true
-				ret_str << number.to_s + " = " + count.to_s + ' (' + ((count.to_f/@total_words_processed) * 100).round(2).to_s + "%)\n" unless count == 0
-			end
-			graph_numbers[number.to_i] = count
-
-		end
-		if  disp
-			ret_str << "\n"
-			horiz = HorizBar.new(graph_numbers.values)
-			horiz.generate
-			ret_str << horiz.graph
-		else
-			ret_str << "None found\n"
-		end
+		result['Single_digit_on_the_end'] = {'count' => @singles_on_end , 'percentage' => ((@singles_on_end.to_f/@total_words_processed) * 100).round(2)}
+		result['Two_digits_on_the_end'] = {'count' => @doubles_on_end , 'percentage' => ((@doubles_on_end.to_f/@total_words_processed) * 100).round(2)}
+		result['Three_digits_on_the_end'] = {'count' => @triples_on_end , 'percentage' => ((@triples_on_end.to_f/@total_words_processed) * 100).round(2)}
 
 		digit_number = 0
 		@last_on_end.each do |a|
@@ -286,44 +332,48 @@ class Basic_Checker < Checker
 
 			digit_number += 1
 			if c.count > 0
-				if (digit_number == 1)
-					ret_str << "\nLast digit\n"
-				else
-					ret_str << "\nLast " + digit_number.to_s + " digits (Top " + @cap_at.to_s + ")\n"
+				digits = {}
+				c[0, @cap_at].each do |d|
+					digits[d[0]] = {'count' => d[1], 'percentage' => ((d[1].to_f/@total_words_processed) * 100).round(2)}
 				end
 
-				c[0, @cap_at].each do |d|
-					ret_str << d[0] + " = " + d[1].to_s + ' (' + ((d[1].to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
+				if (digit_number == 1)
+					result['Last_digit'] = digits
+				else
+					result["Last_" + digit_number.to_s + "_digits_(Top_" + @cap_at.to_s + ")"] = digits
 				end
+
 			end
 		end
 
 		count_ordered = []
 		@char_stats.each_pair do |name, data|
-			count_ordered << [name, data] unless data['count'] == 0
+			count_ordered << [name, data] unless data['count'].zero?
 		end
 		@char_stats = count_ordered.sort do |x,y|
 			(x[1]['count'] <=> y[1]['count']) * -1
 		end
 
-		ret_str << "\nCharacter sets\n"
+		char_sets = {}
 		@char_stats.each do |name, data|
-			ret_str << name + ": " + data['count'].to_s + " (" + ((data['count'].to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
+			char_sets[name] = {'count'=> data['count'], 'percentage' => ((data['count'].to_f/@total_words_processed) * 100).round(2)}
 		end
+		result['Character_sets'] = char_sets
 
 		count_ordered = []
 		@char_sets_ordering.each_pair do |name, data|
-			count_ordered << [name, data] unless data['count'] == 0
+			count_ordered << [name, data] unless data['count'].zero?
 		end
 		@char_sets_ordering = count_ordered.sort do |x,y|
 			(x[1]['count'] <=> y[1]['count']) * -1
 		end
 
-		ret_str << "\nCharacter set ordering\n"
+		char_sets_order = {}
 		@char_sets_ordering.each do |name, data|
-			ret_str << name + ": " + data['count'].to_s + " (" + ((data['count'].to_f/@total_words_processed) * 100).round(2).to_s + "%)\n"
+			char_sets_order[name] = {'count'=> data['count'], 'percentage' => ((data['count'].to_f/@total_words_processed) * 100).round(2)}
 		end
-
-		return ret_str
+		result['Character_set_ordering'] = char_sets_order
+		
+		return result
 	end
 end

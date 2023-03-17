@@ -25,4 +25,15 @@ class Checker
 
 	def get_results (total_words_processed)
 	end
+
+	def get_json_results ()
+	end
+
+	def print_entries(entries)
+		ret_str = ''
+		entries.each do |k, v|
+			ret_str << "#{k} = #{v['count']} (#{v['percentage']}%)\n"
+		end
+		return ret_str
+	end
 end

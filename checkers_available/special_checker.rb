@@ -29,19 +29,29 @@ class Special_Checker < Checker
 	end
 
 	def get_results()
+		data = get_json_results
 		ret_str = "Special Checker\n"
-		disp = false
+		disp = !data.nil?
 
-		(@list.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |special_data|
-			unless special_data[1] == 0
-				disp = true
-				ret_str << "#{special_data[0]} = #{special_data[1].to_s} (#{((special_data[1].to_f/@total_words_processed) * 100).round(2).to_s}%)\n"
-			end
-		end
-		unless disp
+		if disp 
+			ret_str << print_entries(data)
+		else
 			ret_str << "None found\n"
 		end
 
 		return ret_str
 	end
+
+	def get_json_results()
+		result = {}
+
+		(@list.sort do |x,y| (x[1] <=> y[1]) * -1 end).each do |special_data|
+			unless special_data[1].zero?
+				result[special_data[0]] = { 'count' => special_data[1], 'percentage' => ((special_data[1].to_f/@total_words_processed) * 100).round(2) }
+			end
+		end
+
+		return result
+	end
+
 end
