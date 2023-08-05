@@ -2,21 +2,23 @@
 
 # Find out what our base path is
 base_path = File.expand_path(File.dirname(__FILE__))
-#require File.join(base_path, '../horizbar.rb')
-register_checker("Deleet_Checker")
+register_checker("DeLeet_Checker")
 
-class Deleet_Checker < Checker
+class DeLeet_Checker < Checker
 	def initialize
 		super
 		@words = {}
         @deleet_mapping = {
-                    "1" =>  "i",
                     "0" =>  "o",
+                    "1" =>  "i",
+                    "3" =>  "e",
                     "4" =>  "a",
                     "5" =>  "s",
                     "@" =>  "a",
                   }
+		@description = "Turn leet numbers back to alpha characters."
 	end
+
 	def process_word (word, extras = nil)
       word.downcase!
       @deleet_mapping.each {|before, after|
@@ -27,14 +29,13 @@ class Deleet_Checker < Checker
           @words[word] = 0
       end
       @words[word] += 1
+
+      @total_words_processed += 1
     end
 
     def get_results()
-		ret_str = "Basic Results\n\n"
-		ret_str <<  "Total entries = #{@total_words_processed.to_s}\n"
-		uniq_words = @words.to_a.uniq
-		ret_str << "Total unique entries = #{uniq_words.length.to_s}\n"
-		uniq_words = Array.new(@words.to_a.uniq)
+		ret_str = "DeLeet Results\n\n"
+		ret_str <<  "Total entries = #{@words.count.to_s}\n"
 
 		ret_str << "\nTop #{@cap_at.to_s} passwords\n"
 		# The default is to sort lowest to highest, the -1 just inverts that
@@ -42,5 +43,6 @@ class Deleet_Checker < Checker
 			percentage = (elem[1].to_f / @total_words_processed) * 100
 			ret_str << "#{elem[0]} = #{elem[1].to_s} (#{percentage.round(2).to_s}%)\n"
 		}
+        return ret_str
     end
 end
