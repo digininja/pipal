@@ -14,7 +14,7 @@
 #	FILENAME: The file to count
 #
 # Author:: Robin Wood (robin@digi.ninja)
-# Copyright:: Copyright (c) Robin Wood 2021
+# Copyright:: Copyright (c) Robin Wood 2023
 # Licence:: Creative Commons Attribution-Share Alike 2.0
 # Speedbumped by Stefan Venken (stefan.venken@gmail.com)
 #
@@ -25,7 +25,7 @@ require'uri'
 require'json'
 require "pathname"
 
-VERSION = "3.1.2"
+VERSION = "3.2.0"
 
 # Find out what our base path is
 base_path = File.expand_path(File.dirname(__FILE__))
