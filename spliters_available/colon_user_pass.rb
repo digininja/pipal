@@ -11,7 +11,7 @@ class Custom_word_splitter
 	def self.split (line)
 		if line =~ /^([^:]*)\:(.*)$/
 			username = $1
-      word = $2
+			word = $2
 
 			return [word, {"username" => username}]
 		end
