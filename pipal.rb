@@ -25,7 +25,7 @@ require'uri'
 require'json'
 require "pathname"
 
-VERSION = "3.2.0"
+VERSION = "3.4.0"
 
 # Find out what our base path is
 base_path = File.expand_path(File.dirname(__FILE__))
