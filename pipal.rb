@@ -163,7 +163,7 @@ custom_word_splitter = nil
 # If there is a customer Splitter symlinked in then require it in
 # and it will automatically be used
 
-if File.exists?(File.join(base_path, "custom_splitter.rb"))
+if File.exist?(File.join(base_path, "custom_splitter.rb"))
 	require Pathname.new(File.join(base_path, "custom_splitter.rb")).realpath
 	custom_word_splitter = Custom_word_splitter
 end
