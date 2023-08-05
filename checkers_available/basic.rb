@@ -80,7 +80,6 @@ class Basic_Checker < Checker
 		"othermask" => {"regex" => /^.*$/, "count" => 0}
 		}
 
-
 		@description = "Basic Checks"
 	end
 
