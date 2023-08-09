@@ -1,3 +1,4 @@
 .*swp
 .*swq
 checkers_enabled/01basic.rb
+custom_splitter.rb
