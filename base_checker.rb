@@ -23,6 +23,6 @@ class Checker
 	def process_word (word, extras = nil)
 	end
 
-	def get_results (total_words_processed)
+	def get_results ()
 	end
 end
