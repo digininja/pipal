@@ -21,6 +21,8 @@ class DeLeet_Checker < Checker
 
 	def process_word (word, extras = nil)
       word.downcase!
+      # One of these !'s may not be necessary, but being cautious
+      word = word.gsub!(/^[^a-z]*/, "").gsub!(/[^a-z]*$/, '')
       @deleet_mapping.each {|before, after|
         word.tr!(before, after)
       }
