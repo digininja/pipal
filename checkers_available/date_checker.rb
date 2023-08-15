@@ -6,7 +6,7 @@ class Date_Checker < Checker
 		super
 
 		@years = {}
-		1975.upto(2020) do |year|
+		1975.upto(2030) do |year|
 			@years[year] = 0
 		end
 
