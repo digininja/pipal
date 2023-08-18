@@ -77,6 +77,7 @@ Usage: pipal [OPTION] ... FILENAME
 	--gkey <Google Maps API key>: to allow zip code lookups (optional)
 	--list-checkers: Show the available checkers and which are enabled
 	--verbose, -v: Verbose
+    --markdown: Output as markdown
 "
 
 @checkers.each do |class_name|
@@ -155,6 +156,7 @@ def list_checkers
 end
 
 # Defaults
+markdown = false
 verbose = false
 cap_at = 10
 output_file = STDOUT
@@ -198,6 +200,7 @@ opts = PipalGetoptLong.new(
 	[ '--gkey', GetoptLong::REQUIRED_ARGUMENT ],
 	[ "--verbose", "-v" , GetoptLong::NO_ARGUMENT ],
 	[ "--list-checkers" , GetoptLong::NO_ARGUMENT ],
+	[ "--markdown" , GetoptLong::NO_ARGUMENT ],
 )
 
 @checkers.each do |class_name|
@@ -247,6 +250,8 @@ begin
 					puts_msg_with_header("Unable to open output file")
 					exit 1
 				end
+			when "--markdown"
+				markdown = true
 			when "--verbose"
 				verbose = true
 		end
@@ -372,11 +377,23 @@ puts
 puts
 
 modules.each do |mod|
-	output_file.puts mod.get_results
-	output_file.puts
+    results = mod.get_results
+    if markdown
+      len = (results.length) - 1
+      while results[len] == "\n"
+        results.chop!
+        len = len - 1
+      end
+    end
+	output_file.puts results
+    if not markdown
+      output_file.puts
+    end
 end
 
-output_file.puts
+if not markdown
+  output_file.puts
+end
 
 # Companion to the commented out benchmark at the top
 #end
