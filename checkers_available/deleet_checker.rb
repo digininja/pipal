@@ -23,14 +23,16 @@ class DeLeet_Checker < Checker
       word.downcase!
       # One of these !'s may not be necessary, but being cautious
       word = word.gsub!(/^[^a-z]*/, "").gsub!(/[^a-z]*$/, '')
-      @deleet_mapping.each {|before, after|
-        word.tr!(before, after)
-      }
+      if word != ""
+        @deleet_mapping.each {|before, after|
+          word.tr!(before, after)
+        }
 
-      if !@words.has_key?(word)
-          @words[word] = 0
+        if !@words.has_key?(word)
+            @words[word] = 0
+        end
+        @words[word] += 1
       end
-      @words[word] += 1
 
       @total_words_processed += 1
     end
